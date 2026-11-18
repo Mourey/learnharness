@@ -1,0 +1,451 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #lp-grid { position: absolute; inset: 0; background-color: #111214;
+      background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 64px 64px; }
+    #lp-stage { position: absolute; inset: 0; }
+    .lp-node { position: absolute; width: 400px; height: 190px; }
+    .lp-box { position: absolute; inset: 0; box-sizing: border-box; padding: 22px 22px; border-radius: 10px; border: 2px solid #3A3D44; background: #17181B; }
+    .lp-label { font-family: Inter, sans-serif; font-weight: 700; font-size: 40px; color: #E8E8E6; letter-spacing: -0.01em; }
+    .lp-sub { margin-top: 4px; font-family: "JetBrains Mono", monospace; font-size: 28px; color: #9A9CA3; }
+    .lp-note { position: absolute; left: 22px; bottom: 18px; font-family: "JetBrains Mono", monospace; font-size: 28px; font-weight: 600; color: #8FA6FF; white-space: nowrap; }
+    .lp-elabel { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 28px; color: #9A9CA3; white-space: nowrap; }
+    .lp-pk { position: absolute; left: 0; top: 0; width: 14px; height: 14px; background: #8FA6FF; }
+    #lp-title { position: absolute; left: 120px; top: 360px; }
+    #lp-title-main { font-family: Inter, sans-serif; font-weight: 700; font-size: 112px; letter-spacing: -0.02em; color: #E8E8E6; }
+    #lp-title-sub { margin-top: 18px; font-family: Inter, sans-serif; font-size: 44px; color: #9A9CA3; }
+    #lp-title span { display: inline-block; }
+    #lp-cell { position: absolute; left: 180px; top: 145px; width: 400px; height: 170px; font-family: "JetBrains Mono", monospace; }
+    .lp-cell-label { font-size: 28px; color: #9A9CA3; }
+    .lp-cell-num { font-size: 96px; font-weight: 600; line-height: 1.1; color: #E8E8E6; }
+    #lp-tokens, #lp-clock { position: absolute; inset: 0; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="loop" data-width="1920" data-height="1080" data-duration="83.36">
+    <div id="lp-grid"></div>
+    <div id="lp-stage" data-layout-allow-overflow>
+      <svg id="lp-edges" width="1920" height="1080" viewBox="0 0 1920 1080" style="position: absolute; inset: 0;" aria-hidden="true">
+        <defs><marker id="lp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#3A3D44"/></marker></defs>
+        <line id="lp-e-you-agent" x1="1342.606" y1="326.562" x2="1164.541" y2="418.562" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-agent-you" x1="1177.394" y1="443.438" x2="1355.459" y2="351.438" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-agent-repo" x1="1174" y1="540" x2="1346" y2="540" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-repo-tests" x1="1560" y1="649" x2="1560" y2="741" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-tests-agent" x1="1349.032" y1="741" x2="1170.968" y2="649" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-agent-checker" x1="946" y1="649" x2="946" y2="741" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-checker-agent" x1="974" y1="741" x2="974" y2="649" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-state-agent" x1="574" y1="554" x2="746" y2="554" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-agent-state" x1="746" y1="526" x2="574" y2="526" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+        <line id="lp-e-goal-agent" x1="960" y1="339" x2="960" y2="431" stroke="#3A3D44" stroke-width="2" marker-end="url(#lp-arrow)" opacity="0"/>
+      </svg>
+      <div id="lp-el-you-agent" class="lp-elabel" style="left: 1235.213px; top: 337.025px; transform: translate(-50%, -50%); opacity: 0;">prompt</div>
+      <div id="lp-el-agent-you" class="lp-elabel" style="left: 1284.787px; top: 432.975px; transform: translate(-50%, -50%); opacity: 0;">output</div>
+      <div id="lp-el-agent-repo" class="lp-elabel" style="left: 1260px; top: 580px; transform: translate(-50%, -50%); opacity: 0;">act</div>
+      <div id="lp-el-repo-tests" class="lp-elabel" style="left: 1538px; top: 695px; transform: translate(-100%, -50%); opacity: 0;">run</div>
+      <div id="lp-el-tests-agent" class="lp-elabel" style="left: 1278.361px; top: 659.463px; transform: translate(-50%, -50%); opacity: 0;">result</div>
+      <div id="lp-el-agent-checker" class="lp-elabel" style="left: 924px; top: 695px; transform: translate(-100%, -50%); opacity: 0;">claims done</div>
+      <div id="lp-el-checker-agent" class="lp-elabel" style="left: 996px; top: 695px; transform: translate(0, -50%); opacity: 0;">findings</div>
+      <div id="lp-el-state-agent" class="lp-elabel" style="left: 660px; top: 594px; transform: translate(-50%, -50%); opacity: 0;">read</div>
+      <div id="lp-el-agent-state" class="lp-elabel" style="left: 660px; top: 486px; transform: translate(-50%, -50%); opacity: 0;">write</div>
+      <div id="lp-el-goal-agent" class="lp-elabel" style="left: 938px; top: 385px; transform: translate(-100%, -50%); opacity: 0;">stop?</div>
+      <div id="lp-node-you" class="lp-node" style="left: 1360px; top: 135px; opacity: 0;">
+        <div id="lp-box-you" class="lp-box">
+          <div class="lp-label">You</div>
+          <div class="lp-sub">at the keyboard</div>
+          <div id="lp-note-you-0" class="lp-note" style="opacity: 0;">prompt 14 of 14</div>
+          <div id="lp-note-you-1" class="lp-note" style="opacity: 0;">check, decide, verify</div>
+        </div>
+      </div>
+      <div id="lp-node-goal" class="lp-node" style="left: 760px; top: 135px; opacity: 0;">
+        <div id="lp-box-goal" class="lp-box">
+          <div class="lp-label">Goal + budget</div>
+          <div class="lp-sub">stopping rule</div>
+          <div id="lp-note-goal-0" class="lp-note" style="opacity: 0;">checker OK, or 400k</div>
+        </div>
+      </div>
+      <div id="lp-node-state" class="lp-node" style="left: 160px; top: 445px; opacity: 0;">
+        <div id="lp-box-state" class="lp-box">
+          <div class="lp-label">progress.md</div>
+          <div class="lp-sub">memory</div>
+          <div id="lp-note-state-0" class="lp-note" style="opacity: 0;">39 fixes tried</div>
+        </div>
+      </div>
+      <div id="lp-node-agent" class="lp-node" style="left: 760px; top: 445px; opacity: 0;">
+        <div id="lp-box-agent" class="lp-box">
+          <div class="lp-label">Agent</div>
+          <div class="lp-sub">maker</div>
+          <div id="lp-note-agent-0" class="lp-note" style="opacity: 0;">act</div>
+          <div id="lp-note-agent-1" class="lp-note" style="opacity: 0;">context: full</div>
+          <div id="lp-note-agent-2" class="lp-note" style="opacity: 0;">run 40 retries run 3</div>
+          <div id="lp-note-agent-3" class="lp-note" style="opacity: 0;">reads progress first</div>
+        </div>
+      </div>
+      <div id="lp-node-repo" class="lp-node" style="left: 1360px; top: 445px; opacity: 0;">
+        <div id="lp-box-repo" class="lp-box">
+          <div class="lp-label">Repository</div>
+          <div class="lp-sub">code and tools</div>
+          <div id="lp-note-repo-0" class="lp-note" style="opacity: 0;">feedback</div>
+          <div id="lp-note-repo-1" class="lp-note" style="opacity: 0;">test weakened</div>
+          <div id="lp-note-repo-2" class="lp-note" style="opacity: 0;">bug: still there</div>
+        </div>
+      </div>
+      <div id="lp-node-checker" class="lp-node" style="left: 760px; top: 755px; opacity: 0;">
+        <div id="lp-box-checker" class="lp-box">
+          <div class="lp-label">Checker</div>
+          <div class="lp-sub">its own brief</div>
+          <div id="lp-note-checker-0" class="lp-note" style="opacity: 0;">assume it is broken</div>
+          <div id="lp-note-checker-1" class="lp-note" style="opacity: 0;">rejects: weak test</div>
+          <div id="lp-note-checker-2" class="lp-note" style="opacity: 0;">accepts: all green</div>
+        </div>
+      </div>
+      <div id="lp-node-tests" class="lp-node" style="left: 1360px; top: 755px; opacity: 0;">
+        <div id="lp-box-tests" class="lp-box">
+          <div class="lp-label">Tests</div>
+          <div class="lp-sub">feedback</div>
+          <div id="lp-note-tests-0" class="lp-note" style="opacity: 0;">runs every change</div>
+          <div id="lp-note-tests-1" class="lp-note" style="opacity: 0;">PASS</div>
+        </div>
+      </div>
+      <div id="lp-pk-you-agent" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-agent-you" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-agent-repo" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-repo-tests" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-tests-agent" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-agent-checker" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-checker-agent" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-state-agent" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-agent-state" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-pk-goal-agent" class="lp-pk" style="opacity: 0;"></div>
+      <div id="lp-cell">
+        <div id="lp-tokens"><div class="lp-cell-label">tokens</div><div id="lp-tokens-num" class="lp-cell-num">610k</div></div>
+        <div id="lp-clock"><div class="lp-cell-label">time</div><div id="lp-clock-num" class="lp-cell-num">23:47</div></div>
+      </div>
+    </div>
+    <div id="lp-title" data-hold style="opacity: 0;">
+      <div id="lp-title-main"><span id="lp-tw1">Loop</span> <span id="lp-tw2" style="color: #8FA6FF;">engineering</span></div>
+      <div id="lp-title-sub">Build the system that runs the loop.</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.set("#lp-stage", { transformOrigin: "0 0", x: -930, y: -37.5, scale: 1.5 }, 0);
+    tl.set("#lp-node-you", { opacity: 1 }, 0);
+    tl.to("#lp-box-you", {backgroundColor: "rgba(143,166,255,0.14)",borderColor: "#8FA6FF",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 0);
+    tl.fromTo("#lp-node-agent", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0.15);
+    tl.fromTo("#lp-node-repo", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0.3);
+    tl.fromTo("#lp-e-you-agent", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.5);
+    tl.fromTo("#lp-el-you-agent", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.6);
+    tl.fromTo("#lp-e-agent-repo", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.65);
+    tl.fromTo("#lp-el-agent-repo", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.75);
+    tl.fromTo("#lp-e-agent-you", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.8);
+    tl.fromTo("#lp-el-agent-you", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.9);
+    tl.fromTo("#lp-note-you-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.298);
+    tl.set("#lp-pk-you-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 1);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 1);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 2.4);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 3.8);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 5.2);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 6.6);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 8);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 9.4);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 10.8);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 12.2);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 13.6);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 15);
+    tl.fromTo("#lp-pk-you-agent", { x: 1335.606, y: 319.562 }, { x: 1157.541, y: 411.562, duration: 1.4, ease: "none", immediateRender: false }, 16.4);
+    tl.set("#lp-pk-you-agent", { opacity: 0 }, 17.8);
+    tl.set("#lp-pk-agent-repo", { opacity: 1, backgroundColor: "#8FA6FF" }, 1.7);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 1.7);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 3.1);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 4.5);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 5.9);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 7.3);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 8.7);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 10.1);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 11.5);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 12.9);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 14.3);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.4, ease: "none", immediateRender: false }, 15.7);
+    tl.set("#lp-pk-agent-repo", { opacity: 0 }, 17.1);
+    tl.set("#lp-pk-agent-you", { opacity: 1, backgroundColor: "#8FA6FF" }, 2.4);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 2.4);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 3.8);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 5.2);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 6.6);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 8);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 9.4);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 10.8);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 12.2);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 13.6);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 15);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.4, ease: "none", immediateRender: false }, 16.4);
+    tl.set("#lp-pk-agent-you", { opacity: 0 }, 17.8);
+    tl.to("#lp-box-agent", {backgroundColor: "rgba(143,166,255,0.14)",borderColor: "#8FA6FF",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 5.802);
+    tl.to("#lp-box-agent", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 7.379);
+    tl.to("#lp-note-you-0", { opacity: 0, duration: 0.15, ease: "power3.in" }, 11.62);
+    tl.fromTo("#lp-note-you-1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 11.72);
+    tl.fromTo("#lp-note-agent-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 13.138);
+    tl.fromTo("#lp-note-repo-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 13.475);
+    tl.to("#lp-box-you", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 9.19);
+    tl.to("#lp-box-you", {backgroundColor: "rgba(143,166,255,0.14)",borderColor: "#8FA6FF",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 16.075);
+    tl.to("#lp-stage", { opacity: 0.16, filter: "blur(6px)", duration: 0.4, ease: "power2.inOut" }, 18.28);
+    tl.set("#lp-title", { opacity: 1 }, 18.38);
+    tl.fromTo(["#lp-tw1", "#lp-tw2"], { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out", stagger: 0.067 }, 18.43);
+    tl.fromTo("#lp-title-sub", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 19.791);
+    tl.to("#lp-title", { opacity: 0, filter: "blur(6px)", duration: 0.25, ease: "power3.in" }, 23.891);
+    tl.to("#lp-stage", { opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power2.inOut" }, 23.991);
+    tl.to("#lp-stage", { x: -313.548, y: -5.806, scale: 1.011, duration: 1.2, ease: "power2.inOut" }, 25.464);
+    tl.fromTo("#lp-node-tests", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 26.264);
+    tl.fromTo("#lp-e-repo-tests", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 26.464);
+    tl.fromTo("#lp-el-repo-tests", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 26.564);
+    tl.fromTo("#lp-e-tests-agent", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 26.614);
+    tl.fromTo("#lp-el-tests-agent", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 26.714);
+    tl.fromTo("#lp-note-tests-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 27.062);
+    tl.set("#lp-pk-agent-repo", { opacity: 1, backgroundColor: "#8FA6FF" }, 26.962);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.1, ease: "none", immediateRender: false }, 26.962);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.1, ease: "none", immediateRender: false }, 28.062);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.1, ease: "none", immediateRender: false }, 29.162);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.1, ease: "none", immediateRender: false }, 30.262);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 1.1, ease: "none", immediateRender: false }, 31.362);
+    tl.set("#lp-pk-agent-repo", { opacity: 0 }, 32.462);
+    tl.set("#lp-pk-repo-tests", { opacity: 1, backgroundColor: "#8FA6FF" }, 27.512);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 27.512);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 28.612);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 29.712);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 30.812);
+    tl.set("#lp-pk-repo-tests", { opacity: 0 }, 31.912);
+    tl.set("#lp-pk-tests-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 28.062);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 28.062);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 29.162);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 30.262);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 31.362);
+    tl.set("#lp-pk-tests-agent", { opacity: 0 }, 32.462);
+    tl.to("#lp-box-you", {backgroundColor: "#111214",borderColor: "#2C2E33",opacity: 0.4,duration: 0.3,ease: "power2.inOut"}, 29.474);
+    tl.to(["#lp-e-you-agent", "#lp-el-you-agent"], { opacity: 0.25, duration: 0.3, ease: "power2.inOut" }, 29.474);
+    tl.to(["#lp-e-agent-you", "#lp-el-agent-you"], { opacity: 0.5, duration: 0.3, ease: "power2.inOut" }, 29.474);
+    tl.to("#lp-note-you-1", { opacity: 0, duration: 0.15, ease: "power3.in" }, 29.474);
+    tl.set("#lp-pk-agent-you", { opacity: 1, backgroundColor: "#8FA6FF" }, 33.03);
+    tl.fromTo("#lp-pk-agent-you", { x: 1170.394, y: 436.438 }, { x: 1348.459, y: 344.438, duration: 1.1, ease: "none", immediateRender: false }, 33.03);
+    tl.set("#lp-pk-agent-you", { opacity: 0 }, 34.13);
+    tl.to("#lp-box-tests", {backgroundColor: "rgba(127,207,151,0.14)",borderColor: "#7FCF97",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 34.183);
+    tl.set("#lp-note-tests-1", { color: "#7FCF97" }, 0);
+    tl.to("#lp-note-tests-0", { opacity: 0, duration: 0.15, ease: "power3.in" }, 34.183);
+    tl.fromTo("#lp-note-tests-1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 34.283);
+    tl.to("#lp-box-repo", {backgroundColor: "rgba(240,134,111,0.16)",borderColor: "#F0866F",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 36.427);
+    tl.set("#lp-note-repo-1", { color: "#F0866F" }, 0);
+    tl.to("#lp-note-repo-0", { opacity: 0, duration: 0.15, ease: "power3.in" }, 36.427);
+    tl.fromTo("#lp-note-repo-1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 36.527);
+    tl.set("#lp-note-repo-2", { color: "#F0866F" }, 0);
+    tl.to("#lp-note-repo-1", { opacity: 0, duration: 0.15, ease: "power3.in" }, 38.611);
+    tl.fromTo("#lp-note-repo-2", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 38.711);
+    tl.to("#lp-stage", { x: -313.548, y: -5.806, scale: 1.011, duration: 1.2, ease: "power2.inOut" }, 39.948);
+    tl.fromTo("#lp-node-checker", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 40.748);
+    tl.fromTo("#lp-e-agent-checker", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 40.998);
+    tl.fromTo("#lp-el-agent-checker", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 41.098);
+    tl.fromTo("#lp-e-checker-agent", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 41.148);
+    tl.fromTo("#lp-el-checker-agent", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 41.248);
+    tl.to("#lp-box-tests", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 40.748);
+    tl.to("#lp-note-tests-1", { opacity: 0, duration: 0.15, ease: "power3.in" }, 40.748);
+    tl.to("#lp-box-checker", {backgroundColor: "rgba(143,166,255,0.14)",borderColor: "#8FA6FF",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 42.264);
+    tl.fromTo("#lp-note-checker-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 43.09);
+    tl.set("#lp-pk-agent-checker", { opacity: 1, backgroundColor: "#8FA6FF" }, 42.264);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 42.264);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 43.364);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 1.1, ease: "none", immediateRender: false }, 44.464);
+    tl.set("#lp-pk-agent-checker", { opacity: 0 }, 45.564);
+    tl.set("#lp-note-checker-1", { color: "#F0866F" }, 0);
+    tl.to("#lp-note-checker-0", { opacity: 0, duration: 0.15, ease: "power3.in" }, 45.957);
+    tl.fromTo("#lp-note-checker-1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 46.057);
+    tl.set("#lp-pk-checker-agent", { opacity: 1, backgroundColor: "#F0866F" }, 45.957);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 45.957);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 1.1, ease: "none", immediateRender: false }, 47.057);
+    tl.set("#lp-pk-checker-agent", { opacity: 0 }, 48.157);
+    tl.to("#lp-box-checker", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 49.08);
+    tl.to("#lp-box-repo", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 49.08);
+    tl.to("#lp-note-repo-2", { opacity: 0, duration: 0.15, ease: "power3.in" }, 49.08);
+    tl.to("#lp-box-agent", {backgroundColor: "rgba(240,134,111,0.16)",borderColor: "#F0866F",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 49.907);
+    tl.set("#lp-note-agent-1", { color: "#F0866F" }, 0);
+    tl.to("#lp-note-agent-0", { opacity: 0, duration: 0.15, ease: "power3.in" }, 49.907);
+    tl.fromTo("#lp-note-agent-1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 50.007);
+    tl.set("#lp-note-agent-2", { color: "#F0866F" }, 0);
+    tl.to("#lp-note-agent-1", { opacity: 0, duration: 0.15, ease: "power3.in" }, 52.388);
+    tl.fromTo("#lp-note-agent-2", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 52.488);
+    tl.set("#lp-pk-agent-repo", { opacity: 1, backgroundColor: "#8FA6FF" }, 49.08);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 49.08);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 49.88);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 50.68);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 51.48);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 52.28);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 53.08);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 53.88);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 54.68);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 55.48);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.8, ease: "none", immediateRender: false }, 56.28);
+    tl.set("#lp-pk-agent-repo", { opacity: 0 }, 57.08);
+    tl.set("#lp-pk-repo-tests", { opacity: 1, backgroundColor: "#8FA6FF" }, 49.48);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 49.48);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 50.28);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 51.08);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 51.88);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 52.68);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 53.48);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 54.28);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 55.08);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.8, ease: "none", immediateRender: false }, 55.88);
+    tl.set("#lp-pk-repo-tests", { opacity: 0 }, 56.68);
+    tl.set("#lp-pk-tests-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 49.88);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 49.88);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 50.68);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 51.48);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 52.28);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 53.08);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 53.88);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 54.68);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 55.48);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.8, ease: "none", immediateRender: false }, 56.28);
+    tl.set("#lp-pk-tests-agent", { opacity: 0 }, 57.08);
+    tl.to("#lp-stage", { x: 11.034, y: 6.207, scale: 0.989, duration: 1.2, ease: "power2.inOut" }, 56.62);
+    tl.fromTo("#lp-node-state", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 57.42);
+    tl.fromTo("#lp-e-state-agent", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 57.67);
+    tl.fromTo("#lp-el-state-agent", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 57.77);
+    tl.fromTo("#lp-e-agent-state", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 57.82);
+    tl.fromTo("#lp-el-agent-state", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 57.92);
+    tl.fromTo("#lp-note-state-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 59.832);
+    tl.set("#lp-pk-state-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 60.731);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 1.1, ease: "none", immediateRender: false }, 60.731);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 1.1, ease: "none", immediateRender: false }, 61.831);
+    tl.set("#lp-pk-state-agent", { opacity: 0 }, 62.931);
+    tl.to("#lp-box-agent", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 60.731);
+    tl.to("#lp-note-agent-2", { opacity: 0, duration: 0.15, ease: "power3.in" }, 60.731);
+    tl.fromTo("#lp-note-agent-3", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 60.831);
+    tl.set("#lp-pk-agent-state", { opacity: 1, backgroundColor: "#8FA6FF" }, 62.98);
+    tl.fromTo("#lp-pk-agent-state", { x: 739, y: 519 }, { x: 567, y: 519, duration: 1.1, ease: "none", immediateRender: false }, 62.98);
+    tl.set("#lp-pk-agent-state", { opacity: 0 }, 64.08);
+    tl.to("#lp-tokens", { opacity: 1, duration: 0.3, ease: "power2.out" }, 64.97);
+    const tok = { v: 610 };
+    tl.to(tok, { v: 1480, duration: 6.357, ease: "power1.in", onUpdate: () => { const v = Math.round(tok.v); document.querySelector("#lp-tokens-num").textContent = v >= 1000 ? (v / 1000).toFixed(2) + "M" : v + "k"; } }, 64.97);
+    tl.to("#lp-tokens-num", { color: "#F0866F", duration: 0.4, ease: "power2.inOut" }, 68.96);
+    tl.set("#lp-pk-agent-repo", { opacity: 1, backgroundColor: "#8FA6FF" }, 64.97);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 64.97);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 65.52);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 66.07);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 66.62);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 67.17);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 67.72);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 68.27);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 68.82);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 69.37);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 69.92);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 70.47);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.55, ease: "none", immediateRender: false }, 71.02);
+    tl.set("#lp-pk-agent-repo", { opacity: 0 }, 71.57);
+    tl.set("#lp-pk-repo-tests", { opacity: 1, backgroundColor: "#8FA6FF" }, 65.245);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 65.245);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 65.795);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 66.345);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 66.895);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 67.445);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 67.995);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 68.545);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 69.095);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 69.645);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 70.195);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 70.745);
+    tl.set("#lp-pk-repo-tests", { opacity: 0 }, 71.295);
+    tl.set("#lp-pk-tests-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 65.52);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 65.52);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 66.07);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 66.62);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 67.17);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 67.72);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 68.27);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 68.82);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 69.37);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 69.92);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 70.47);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 71.02);
+    tl.set("#lp-pk-tests-agent", { opacity: 0 }, 71.57);
+    tl.set("#lp-pk-agent-checker", { opacity: 1, backgroundColor: "#8FA6FF" }, 65.795);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 65.795);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 66.345);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 66.895);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 67.445);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 67.995);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 68.545);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 69.095);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 69.645);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 70.195);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.55, ease: "none", immediateRender: false }, 70.745);
+    tl.set("#lp-pk-agent-checker", { opacity: 0 }, 71.295);
+    tl.set("#lp-pk-checker-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 66.07);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 66.07);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 66.62);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 67.17);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 67.72);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 68.27);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 68.82);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 69.37);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 69.92);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 70.47);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.55, ease: "none", immediateRender: false }, 71.02);
+    tl.set("#lp-pk-checker-agent", { opacity: 0 }, 71.57);
+    tl.set("#lp-pk-state-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 66.345);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 66.345);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 66.895);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 67.445);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 67.995);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 68.545);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 69.095);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 69.645);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 70.195);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.55, ease: "none", immediateRender: false }, 70.745);
+    tl.set("#lp-pk-state-agent", { opacity: 0 }, 71.295);
+    tl.to("#lp-note-agent-3", { opacity: 0, duration: 0.15, ease: "power3.in" }, 64.97);
+    tl.fromTo("#lp-node-goal", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 71.87);
+    tl.fromTo("#lp-e-goal-agent", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 72.12);
+    tl.fromTo("#lp-el-goal-agent", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 72.22);
+    tl.to("#lp-box-goal", {backgroundColor: "rgba(143,166,255,0.14)",borderColor: "#8FA6FF",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 73.848);
+    tl.fromTo("#lp-note-goal-0", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 73.948);
+    tl.set("#lp-pk-goal-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 73.848);
+    tl.fromTo("#lp-pk-goal-agent", { x: 953, y: 332 }, { x: 953, y: 424, duration: 1.1, ease: "none", immediateRender: false }, 73.848);
+    tl.fromTo("#lp-pk-goal-agent", { x: 953, y: 332 }, { x: 953, y: 424, duration: 1.1, ease: "none", immediateRender: false }, 74.948);
+    tl.fromTo("#lp-pk-goal-agent", { x: 953, y: 332 }, { x: 953, y: 424, duration: 1.1, ease: "none", immediateRender: false }, 76.048);
+    tl.fromTo("#lp-pk-goal-agent", { x: 953, y: 332 }, { x: 953, y: 424, duration: 1.1, ease: "none", immediateRender: false }, 77.148);
+    tl.set("#lp-pk-goal-agent", { opacity: 0 }, 78.248);
+    tl.to("#lp-tokens-num", { color: "#9A9CA3", duration: 0.3, ease: "power2.inOut" }, 75.825);
+    tl.to("#lp-box-checker", {backgroundColor: "rgba(127,207,151,0.14)",borderColor: "#7FCF97",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 76.719);
+    tl.set("#lp-note-checker-2", { color: "#7FCF97" }, 0);
+    tl.to("#lp-note-checker-1", { opacity: 0, duration: 0.15, ease: "power3.in" }, 76.719);
+    tl.fromTo("#lp-note-checker-2", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 76.819);
+    tl.to("#lp-tokens", { opacity: 0, filter: "blur(6px)", duration: 0.2, ease: "power3.in" }, 79.06);
+    tl.to("#lp-node-you", { opacity: 0, filter: "blur(6px)", duration: 0.6, ease: "power3.in" }, 79.785);
+    tl.to(["#lp-e-you-agent", "#lp-el-you-agent", "#lp-e-agent-you", "#lp-el-agent-you"], { opacity: 0, duration: 0.4, ease: "power3.in" }, 79.785);
+    tl.to("#lp-box-goal", {backgroundColor: "#17181B",borderColor: "#3A3D44",opacity: 1,duration: 0.3,ease: "power2.inOut"}, 79.06);
+    tl.to("#lp-clock", { opacity: 1, duration: 0.3, ease: "power2.out" }, 80.871);
+    const clk = { m: 1427 };
+    tl.to(clk, { m: 1870, duration: 1.889, ease: "power2.inOut", onUpdate: () => { const m = Math.round(clk.m) % 1440; document.querySelector("#lp-clock-num").textContent = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); } }, 81.071);
+    tl.set("#lp-pk-agent-repo", { opacity: 1, backgroundColor: "#8FA6FF" }, 80.871);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.9, ease: "none", immediateRender: false }, 80.871);
+    tl.fromTo("#lp-pk-agent-repo", { x: 1167, y: 533 }, { x: 1339, y: 533, duration: 0.9, ease: "none", immediateRender: false }, 81.771);
+    tl.set("#lp-pk-agent-repo", { opacity: 0 }, 82.671);
+    tl.set("#lp-pk-repo-tests", { opacity: 1, backgroundColor: "#8FA6FF" }, 81.321);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.9, ease: "none", immediateRender: false }, 81.321);
+    tl.fromTo("#lp-pk-repo-tests", { x: 1553, y: 642 }, { x: 1553, y: 734, duration: 0.9, ease: "none", immediateRender: false }, 82.221);
+    tl.set("#lp-pk-repo-tests", { opacity: 0 }, 83.121);
+    tl.set("#lp-pk-tests-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 81.771);
+    tl.fromTo("#lp-pk-tests-agent", { x: 1342.032, y: 734 }, { x: 1163.968, y: 642, duration: 0.9, ease: "none", immediateRender: false }, 81.771);
+    tl.set("#lp-pk-tests-agent", { opacity: 0 }, 82.671);
+    tl.set("#lp-pk-agent-checker", { opacity: 1, backgroundColor: "#8FA6FF" }, 82.221);
+    tl.fromTo("#lp-pk-agent-checker", { x: 939, y: 642 }, { x: 939, y: 734, duration: 0.9, ease: "none", immediateRender: false }, 82.221);
+    tl.set("#lp-pk-agent-checker", { opacity: 0 }, 83.121);
+    tl.set("#lp-pk-checker-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 82.671);
+    tl.fromTo("#lp-pk-checker-agent", { x: 967, y: 734 }, { x: 967, y: 642, duration: 0.9, ease: "none", immediateRender: false }, 82.671);
+    tl.set("#lp-pk-checker-agent", { opacity: 0 }, 83.571);
+    tl.set("#lp-pk-state-agent", { opacity: 1, backgroundColor: "#8FA6FF" }, 83.121);
+    tl.fromTo("#lp-pk-state-agent", { x: 567, y: 547 }, { x: 739, y: 547, duration: 0.9, ease: "none", immediateRender: false }, 83.121);
+    tl.set("#lp-pk-state-agent", { opacity: 0 }, 84.021);
+    tl.set("#lp-pk-agent-state", { opacity: 1, backgroundColor: "#8FA6FF" }, 83.571);
+    tl.fromTo("#lp-pk-agent-state", { x: 739, y: 519 }, { x: 567, y: 519, duration: 0.9, ease: "none", immediateRender: false }, 83.571);
+    tl.set("#lp-pk-agent-state", { opacity: 0 }, 84.471);
+    window.__timelines["loop"] = tl;
+  </script>
+</template>

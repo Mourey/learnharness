@@ -1,0 +1,16 @@
+[
+  ["b01", "Eleven forty-seven. A test is failing. You paste the error, the agent edits, you run the tests and type again. Prompt fourteen."],
+  ["b02", "Follow the arrows. Every turn starts with your prompt and ends with you judging the result. The agent does the work. You do the deciding."],
+  ["b03", "Every working loop runs five steps. Check state. Decide. Act. Gather feedback. Verify. You were doing four of them in your head."],
+  ["b04", "Loop engineering means building the system that does them, so the agent can drive itself."],
+  ["b05", "First, a signal it can read. Tests run after every change and report back, so the agent fixes the next failure itself."],
+  ["b06", "Then it says done. The tests pass. But to get there, it weakened the test that was failing. The bug is still there."],
+  ["b07", "So add a checker with its own brief. Assume the work is broken, and find out why. It reads the diff, not just the result."],
+  ["b08", "An hour in, the context is full of tool output. At run forty, it retries a fix the checker rejected at run three."],
+  ["b09", "Keep state outside the conversation. A progress file it reads at the start of every run, and updates at the end."],
+  ["b10", "Now nothing tells it to stop. A loop with no stopping rule burns tokens until someone notices."],
+  ["b11", "Write the stopping rule first. A goal the checker can verify, and a budget. It stops when either is met."],
+  ["b12", "Now you can close the laptop. The loop keeps turning."],
+  ["b13", "Seven ten. The build is green, the checker signed off, and a report says what was tried."],
+  ["b14", "Stop writing the prompt that drives the agent. Write the system that prompts it."]
+]

@@ -1,0 +1,55 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #nt-grid { position: absolute; inset: 0; background-color: #111214;
+      background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 64px 64px; }
+    #nt-term { position: absolute; left: 120px; top: 150px; width: 1240px; height: 760px; background: #17181B; border: 1px solid #2C2E33; border-radius: 10px; overflow: hidden; }
+    #nt-bar { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid #2C2E33;
+      font-family: "JetBrains Mono", monospace; font-size: 28px; color: #9A9CA3; }
+    #nt-clock { color: #E8E8E6; font-weight: 600; }
+    #nt-body { padding: 36px 40px; display: flex; flex-direction: column; gap: 22px; font-family: "JetBrains Mono", monospace; font-size: 34px; white-space: pre; }
+    #nt-count { position: absolute; left: 1440px; top: 150px; width: 360px; height: 760px; display: flex; flex-direction: column; justify-content: center; gap: 8px;
+      font-family: "JetBrains Mono", monospace; color: #9A9CA3; }
+    #nt-count-label { font-size: 28px; }
+    #nt-count-num { position: relative; height: 230px; font-size: 220px; font-weight: 600; line-height: 230px; color: #E8E8E6; }
+    #nt-count-num span { position: absolute; left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="night" data-width="1920" data-height="1080" data-duration="9.93">
+    <div id="nt-grid"></div>
+    <div id="nt-term">
+      <div id="nt-bar"><span>zsh — checkout-service</span><span id="nt-clock">23:47</span></div>
+      <div id="nt-body">
+        <div id="nt-l1" style="color: #E8E8E6;">$ npm test</div>
+        <div id="nt-l2" style="color: #F0866F; opacity: 0;">✗ checkout.spec › totals   expected 108, received 96</div>
+        <div id="nt-l3" style="color: #8FA6FF; opacity: 0;">you   › fix the failing totals test</div>
+        <div id="nt-l4" style="color: #9A9CA3; opacity: 0;">agent › edited src/cart.ts (rounding)</div>
+        <div id="nt-l5" style="color: #E8E8E6; opacity: 0;">$ npm test</div>
+        <div id="nt-l6" style="color: #F0866F; opacity: 0;">✗ checkout.spec › totals   expected 108, received 107</div>
+        <div id="nt-l7" style="color: #8FA6FF; opacity: 0;">you   › still failing, try again</div>
+      </div>
+    </div>
+    <div id="nt-count" aria-label="Prompt count">
+      <div id="nt-count-label">prompt</div>
+      <div id="nt-count-num"><span id="nt-n12">12</span><span id="nt-n13" style="opacity: 0;">13</span><span id="nt-n14" style="opacity: 0;">14</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#nt-clock", { color: "#9A9CA3" }, { color: "#8FA6FF", duration: 0.3, ease: "power2.inOut" }, 0.8);
+    tl.to("#nt-clock", { color: "#E8E8E6", duration: 0.3, ease: "power2.inOut" }, 2.144);
+    tl.fromTo("#nt-l2", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 2.816);
+    tl.fromTo("#nt-l3", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 3.42);
+    tl.fromTo("#nt-l4", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 4.831);
+    tl.fromTo("#nt-l5", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 5.974);
+    tl.fromTo("#nt-l6", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 6.511);
+    tl.fromTo("#nt-l7", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 7.452);
+    tl.to("#nt-n12", { opacity: 0, y: -40, duration: 0.18, ease: "power3.in" }, 7.452);
+    tl.fromTo("#nt-n13", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.25, ease: "expo.out" }, 7.572);
+    tl.to("#nt-n13", { opacity: 0, y: -40, duration: 0.18, ease: "power3.in" }, 8.258);
+    tl.fromTo("#nt-n14", { opacity: 0, y: 40, color: "#E8E8E6" }, { opacity: 1, y: 0, color: "#F0866F", duration: 0.3, ease: "expo.out" }, 8.378);
+    tl.to("#nt-count", { opacity: 0, duration: 0.2, ease: "power3.in" }, 9.23);
+    tl.to("#nt-term", { x: 670, y: -222.5, scale: 0.484, opacity: 0.55, duration: 0.55, ease: "power3.inOut" }, 9.33);
+    window.__timelines["night"] = tl;
+  </script>
+</template>
