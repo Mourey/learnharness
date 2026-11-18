@@ -1,0 +1,42 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #mn-ground { position: absolute; inset: 0; background: #111214; }
+    #mn-clock { position: absolute; left: 120px; top: 150px; font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 120px; color: #16181D; }
+    #mn-panel { position: absolute; left: 120px; top: 380px; width: 1280px; box-sizing: border-box; padding: 40px 48px; border-radius: 16px; background: #F6F7F9; border: 1px solid #DFE2E8;
+      display: flex; flex-direction: column; gap: 28px; font-family: "JetBrains Mono", monospace; font-size: 36px; }
+    .mn-line { display: flex; gap: 40px; }
+    .mn-what { width: 640px; font-weight: 600; }
+    .mn-result { color: #3D424C; }
+    #mn-claim { position: absolute; left: 120px; top: 360px; width: 1600px; font-family: Inter, sans-serif; font-weight: 700; color: #16181D; letter-spacing: -0.02em; }
+    #mn-claim-1 { font-size: 60px; color: #5B606B; }
+    #mn-claim-2 { margin-top: 24px; font-size: 92px; line-height: 1.05; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="morning" data-width="1920" data-height="1080" data-duration="14.693">
+    <div id="mn-ground"></div>
+    <div id="mn-clock" style="opacity: 0;">07:10</div>
+    <div id="mn-panel" style="opacity: 0;">
+      <div id="mn-l1" class="mn-line" style="opacity: 0;"><span class="mn-what" style="color: #22603A;">✓  checkout.spec › totals</span><span class="mn-result">passed</span></div>
+      <div id="mn-l2" class="mn-line" style="opacity: 0;"><span class="mn-what" style="color: #22603A;">✓  checker</span><span class="mn-result">accepted the diff</span></div>
+      <div id="mn-l3" class="mn-line" style="opacity: 0;"><span class="mn-what" style="color: #2348C9;">→  progress.md</span><span class="mn-result">41 runs · report written</span></div>
+    </div>
+    <div id="mn-claim">
+      <div id="mn-claim-1" style="opacity: 0;">Stop writing the prompt that drives the agent.</div>
+      <div id="mn-claim-2" style="opacity: 0;">Write the <span style="color: #2348C9;">system</span> that prompts it.</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.to("#mn-ground", { backgroundColor: "#FFFFFF", duration: 0.4, ease: "power2.inOut" }, 0.05);
+    tl.fromTo("#mn-clock", { opacity: 0, scale: 0.94, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0.5);
+    tl.fromTo("#mn-panel", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.8);
+    tl.fromTo("#mn-l1", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.188);
+    tl.fromTo("#mn-l2", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 2.439);
+    tl.fromTo("#mn-l3", { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 4.19);
+    tl.to("#mn-clock", { opacity: 0, filter: "blur(6px)", duration: 0.22, ease: "power3.in" }, 6.5);
+    tl.to("#mn-panel", { opacity: 0, filter: "blur(6px)", duration: 0.22, ease: "power3.in" }, 6.5);
+    tl.fromTo("#mn-claim-1", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 6.8);
+    tl.fromTo("#mn-claim-2", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 9.557);
+    window.__timelines["morning"] = tl;
+  </script>
+</template>

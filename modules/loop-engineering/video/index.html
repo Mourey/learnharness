@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #111214; }
+      #root { position: relative; width: 100%; height: 100%; font-family: Inter, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="107.983" data-width="1920" data-height="1080">
+      <div id="night" data-composition-id="night" data-composition-src="compositions/night.html" data-start="0" data-duration="9.93" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="loop" data-composition-id="loop" data-composition-src="compositions/loop.html" data-start="9.93" data-duration="83.36" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="morning" data-composition-id="morning" data-composition-src="compositions/morning.html" data-start="93.29" data-duration="14.693" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <audio id="vo-b01" class="clip" src="assets/voice/b01.wav" data-start="0.8" data-duration="8.533" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b02" class="clip" src="assets/voice/b02.wav" data-start="9.93" data-duration="8.64" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b03" class="clip" src="assets/voice/b03.wav" data-start="19.12" data-duration="8.64" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b04" class="clip" src="assets/voice/b04.wav" data-start="28.31" data-duration="5.461" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b05" class="clip" src="assets/voice/b05.wav" data-start="34.17" data-duration="8.235" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b06" class="clip" src="assets/voice/b06.wav" data-start="42.96" data-duration="6.976" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b07" class="clip" src="assets/voice/b07.wav" data-start="50.48" data-duration="7.979" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b08" class="clip" src="assets/voice/b08.wav" data-start="59.01" data-duration="7.787" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b09" class="clip" src="assets/voice/b09.wav" data-start="67.35" data-duration="6.997" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b10" class="clip" src="assets/voice/b10.wav" data-start="74.9" data-duration="6.357" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b11" class="clip" src="assets/voice/b11.wav" data-start="81.8" data-duration="6.635" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b12" class="clip" src="assets/voice/b12.wav" data-start="88.99" data-duration="3.2" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b13" class="clip" src="assets/voice/b13.wav" data-start="93.79" data-duration="5.504" data-track-index="3" data-volume="0.9"></audio>
+      <audio id="vo-b14" class="clip" src="assets/voice/b14.wav" data-start="100.09" data-duration="4.693" data-track-index="3" data-volume="0.9"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
