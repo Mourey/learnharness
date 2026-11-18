@@ -226,17 +226,20 @@ describe("KeysSection (thin SSR)", () => {
 });
 
 describe("AppearanceSection (thin SSR)", () => {
-	it("mode is rendered DISABLED — dark-only this wave, no lying control", () => {
+	it("mode offers Dark (Night desk) and Light (Paper), enabled (app shell, 2026-11-18)", () => {
 		const html = renderToStaticMarkup(<AppearanceSection appearance={undefined} onSectionChange={() => {}} />);
-		assert.ok(tagOf(html, "select-mode").includes("disabled"), "mode select disabled");
-		assert.ok(html.includes("Coming soon"));
-		// The whole row dims, graph-view style (the control never adds its own).
-		assert.ok(tagOf(html, "row-mode").includes("opacity-40"), "mode row dims whole");
+		assert.ok(!tagOf(html, "select-mode").includes("disabled"), "mode select enabled");
+		assert.ok(!tagOf(html, "row-mode").includes("opacity-40"), "mode row not dimmed");
+		assert.ok(html.includes('<option value="dark"') && html.includes('<option value="light"'));
+		assert.ok(html.includes("Night desk"), "the hint names the dark palette");
+		// The background override is a dark-curve customization: its row
+		// stays live in dark mode.
+		assert.ok(!tagOf(html, "row-background").includes("opacity-40"));
 	});
 
 	it("hex inputs carry the factory placeholders; prose size resolves against the factory", () => {
 		const html = renderToStaticMarkup(<AppearanceSection appearance={undefined} onSectionChange={() => {}} />);
-		assert.ok(html.includes(`placeholder="#141414"`));
+		assert.ok(html.includes(`placeholder="#111214"`));
 		// The reading font is the searchable dropdown now (font-menu
 		// wave): its trigger shows the factory family; the emphasis
 		// inks' empty state is "same as text" (the old hexes died with

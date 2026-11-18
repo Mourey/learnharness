@@ -7,9 +7,8 @@
  * variables move IMMEDIATELY (the section's whole point — it must DO
  * something). Hex inputs commit on blur/Enter; the background derives the
  * raised/accent/edge palette in code (components/settings/appearance.tsx).
- * Mode is dark-only this wave: control rendered DISABLED with a note — the
- * light palette is the design wave's work, and a lying control is worse
- * than an honest disabled one.
+ * Mode (app shell, 2026-11-18): Dark is Night desk, Light is Paper. The
+ * custom background derives on the dark curve, so its row dims in Light.
  *
  * Graph graying (owner, 2026-09-20) follows the graph viewer's render-panel
  * convention: the whole row dims when a parent is off (stored values
@@ -186,19 +185,26 @@ export function AppearanceSection({
 
 	return (
 		<>
-			<SettingsRow label="Mode" hint="Coming soon" testid="row-mode" dimmed>
-				<ThinSelect value="dark" ariaLabel="mode" onChange={() => {}} testid="select-mode" disabled>
+			<SettingsRow label="Mode" hint={resolved.mode === "light" ? "Paper" : "Night desk"} testid="row-mode">
+				<ThinSelect
+					value={resolved.mode}
+					ariaLabel="mode"
+					onChange={(v) => onSectionChange({ ...appearance, mode: v === "light" ? "light" : "dark" })}
+					testid="select-mode"
+				>
 					<option value="dark">Dark</option>
+					<option value="light">Light</option>
 				</ThinSelect>
 			</SettingsRow>
 			<SettingsRow
 				label="Background"
-				hint={`Empty = ${resolved.background ?? "#141414"}`}
+				hint={resolved.mode === "light" ? "Dark mode only" : `Empty = ${resolved.background ?? "#111214"}`}
 				testid="row-background"
+				dimmed={resolved.mode === "light"}
 			>
 				<CommitInput
 					value={appearance?.background ?? ""}
-					placeholder="#141414"
+					placeholder="#111214"
 					ariaLabel="background hex"
 					testid="input-background"
 					onCommit={(v) => onSectionChange({ ...appearance, background: v === "" ? null : v })}

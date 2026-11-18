@@ -7,11 +7,17 @@ import { ActivityProvider } from "@/components/activity-dock";
 import { ServerEventsProvider } from "@/components/server-events";
 import { AppearanceProvider } from "@/components/settings/appearance";
 import UpdateBanner from "@/components/update-banner";
+import { readSettingsRecord } from "@/src/server";
+import { resolveSettings } from "@/src/core";
 
 // Chrome = JetBrains Mono, teaching prose = Source Sans 3, titles = CMU
 // Serif (the bundled lh-cmu @font-face in globals.css — no CDN).
 const ui = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 const prose = Source_Sans_3({ subsets: ["latin"], variable: "--font-sans3" });
+
+// Dynamic: the root reads the saved appearance mode per request, so a
+// mode change is never baked into a prerendered page.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
 	title: "Learning Harness",
@@ -19,8 +25,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+	// The saved mode's class is server-rendered so the first frame is
+	// already Night desk or Paper (app shell, 2026-11-18); the appearance
+	// provider flips it when the setting changes.
+	const mode = resolveSettings(readSettingsRecord() ?? null).appearance.mode;
 	return (
-		<html lang="en" className={`dark ${ui.variable} ${prose.variable}`}>
+		<html lang="en" className={`${mode} ${ui.variable} ${prose.variable}`}>
 			<body className="min-h-dvh antialiased">
 			{/* The notification channel rides OUTSIDE everything: sidebar, dock,
 				 and pages all subscribe as the polls retire (push S3, 2026-10-02). */}
