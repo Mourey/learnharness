@@ -381,6 +381,16 @@ function projectMarker(marker: LhMarkerMessage, out: LhViewMessage[]): void {
 			});
 			return;
 		}
+		case "module-context": {
+			// The module tutor's context (app shell, 2026-11-18): the same
+			// user-side collapsible card treatment as graph-context.
+			out.push({
+				id: marker.id,
+				role: "user",
+				parts: [{ type: "data-module-context", id: `mc_${marker.id}`, data: marker.details }],
+			});
+			return;
+		}
 		case "probe-handoff": {
 			out.push({
 				id: marker.id,

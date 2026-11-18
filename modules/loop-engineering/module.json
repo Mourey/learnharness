@@ -1,0 +1,7 @@
+{
+  "title": "Loop engineering",
+  "summary": "Stop prompting the agent turn by turn. Design the loop that prompts it: feedback, a separate checker, memory and a stopping rule.",
+  "video": { "file": "video/renders/loop-engineering.mp4", "duration": "1:48" },
+  "lesson": "lesson.json",
+  "wikiSource": "concepts/loop-engineering.md"
+}

@@ -1,0 +1,360 @@
+{
+  "title": "Loop engineering",
+  "description": "Stop prompting the agent turn by turn. Design the loop that prompts it: feedback, a separate checker, memory and a stopping rule.",
+  "topic": "agent-workflows",
+  "publishedAt": "2026-11-17",
+  "draft": false,
+  "duration": "12 min",
+  "scene": {
+    "label": "An agent fixing a failing build",
+    "nodes": [
+      { "id": "you", "label": "You", "sublabel": "at the keyboard", "x": 85, "y": 15 },
+      { "id": "goal", "label": "Goal + budget", "sublabel": "stopping rule", "x": 50, "y": 15 },
+      { "id": "state", "label": "progress.md", "sublabel": "memory", "x": 15, "y": 50 },
+      { "id": "agent", "label": "Agent", "sublabel": "maker", "x": 50, "y": 50 },
+      { "id": "repo", "label": "Repository", "sublabel": "code and tools", "x": 85, "y": 50 },
+      { "id": "verifier", "label": "Checker", "sublabel": "its own brief", "x": 50, "y": 85 },
+      { "id": "tests", "label": "Tests", "sublabel": "feedback", "x": 85, "y": 85 }
+    ],
+    "edges": [
+      { "id": "you-agent", "from": "you", "to": "agent", "label": "prompt", "bend": -10 },
+      { "id": "agent-you", "from": "agent", "to": "you", "label": "output", "bend": -10 },
+      { "id": "agent-repo", "from": "agent", "to": "repo", "label": "act" },
+      { "id": "repo-tests", "from": "repo", "to": "tests", "label": "run" },
+      { "id": "tests-agent", "from": "tests", "to": "agent", "label": "result", "bend": 8 },
+      { "id": "agent-verifier", "from": "agent", "to": "verifier", "label": "claims done", "bend": -14 },
+      { "id": "verifier-agent", "from": "verifier", "to": "agent", "label": "findings", "bend": -14 },
+      { "id": "state-agent", "from": "state", "to": "agent", "label": "read", "bend": -12 },
+      { "id": "agent-state", "from": "agent", "to": "state", "label": "write", "bend": -12 },
+      { "id": "goal-agent", "from": "goal", "to": "agent", "label": "stop?" }
+    ]
+  },
+  "metrics": [
+    { "id": "prompts", "label": "Your prompts", "better": "lower" },
+    { "id": "unattended", "label": "Unattended", "unit": "min", "better": "higher" },
+    { "id": "tokens", "label": "Tokens", "unit": "k", "better": "lower" },
+    { "id": "verified", "label": "Done means", "better": "higher" }
+  ],
+  "steps": [
+    {
+      "id": "you-prompt",
+      "chapter": "setup",
+      "short": "Prompting",
+      "title": "It starts with you at the keyboard",
+      "body": [
+        "A test started failing overnight. You open an agent, paste the error and ask it to fix the build.",
+        "The agent edits a file and reports back. You read the output, run the tests yourself and type the next prompt."
+      ],
+      "metrics": { "prompts": 1, "unattended": 0, "tokens": 15, "verified": "you say so" },
+      "scene": {
+        "show": ["you", "agent", "repo"],
+        "states": { "you": "active", "agent": "active" },
+        "flows": [{ "edge": "you-agent" }, { "edge": "agent-repo" }, { "edge": "agent-you" }]
+      }
+    },
+    {
+      "id": "you-are-loop",
+      "chapter": "problem",
+      "short": "You are the loop",
+      "title": "Every turn goes through you",
+      "body": [
+        "Follow the arrows. Each iteration starts with your prompt and ends with you judging the result. The agent does the work; *you* do the deciding.",
+        "That holds up for one task. It does not scale to ten, and it stops completely when you close the laptop."
+      ],
+      "callout": { "kind": "warn", "text": "Better prompts only improve the decision step. Every other step still waits for you." },
+      "changes": ["~ 14 prompts to fix one test", "~ 0 minutes unattended"],
+      "metrics": { "prompts": 14, "unattended": 0, "tokens": 40, "verified": "you say so" },
+      "scene": {
+        "show": ["you", "agent", "repo"],
+        "states": { "you": "active" },
+        "notes": { "you": "prompt 14 of 14" },
+        "flows": [{ "edge": "you-agent" }, { "edge": "agent-repo" }, { "edge": "agent-you" }]
+      }
+    },
+    {
+      "id": "five-steps",
+      "chapter": "technique",
+      "short": "Five steps",
+      "title": "Name the steps you were doing by hand",
+      "body": [
+        "Every working loop runs the same five steps: **check state**, **decide** the next action, **act**, **gather feedback** and **verify** whether the goal is met.",
+        "You were doing four of the five in your head. [[Loop engineering]] means building a system that does them, so the agent can drive itself."
+      ],
+      "callout": { "kind": "tip", "text": "The shift: stop writing the prompt that drives the agent. Write the system that prompts it." },
+      "metrics": { "prompts": 14, "unattended": 0, "tokens": 40, "verified": "you say so" },
+      "scene": {
+        "show": ["you", "agent", "repo"],
+        "states": { "you": "active", "agent": "active" },
+        "notes": { "you": "check, decide, verify", "agent": "act", "repo": "feedback" },
+        "flows": [{ "edge": "you-agent" }, { "edge": "agent-you" }]
+      }
+    },
+    {
+      "id": "who-says-done",
+      "chapter": "problem",
+      "short": "Who says done?",
+      "title": "Hand over the loop. Who decides it is done?",
+      "body": [
+        "Take yourself out. The agent now loops on its own: edit, re-run, edit again. Something has to tell it when to stop.",
+        "Commit to an answer before you continue."
+      ],
+      "metrics": { "prompts": 1, "unattended": 10, "tokens": 60, "verified": "?" },
+      "scene": {
+        "show": ["you", "agent", "repo"],
+        "states": { "you": "muted", "agent": "active" },
+        "flows": [{ "edge": "agent-repo" }]
+      },
+      "predict": {
+        "prompt": "What should end this loop?",
+        "options": [
+          { "id": "self-report", "text": "The agent reports that the fix is complete.", "misconception": "That is self-assessment: the agent that did the work grades its own work." },
+          { "id": "outside-check", "text": "A check outside the agent passes, such as the test suite going green." },
+          { "id": "context-full", "text": "The context window fills up.", "misconception": "Running out of room is a failure, not a finish line." },
+          { "id": "fixed-count", "text": "A fixed number of iterations.", "misconception": "A cap is a budget. It stops the loop but says nothing about whether the goal was met." }
+        ],
+        "answer": "outside-check",
+        "explanation": "A loop needs a signal it cannot talk its way past. For a failing build that signal is the test suite: it either passes or it does not. Caps are still useful, but as a safety stop, not as the definition of done."
+      }
+    },
+    {
+      "id": "feedback",
+      "chapter": "solution",
+      "short": "Feedback",
+      "title": "Give the loop a signal it can read",
+      "body": [
+        "Add the tests as the loop's feedback. After each edit the agent runs them and reads the result before deciding what to do next.",
+        "This is a [[deterministic loop]]: done is binary. Builds, lint, deployments and health checks all fit."
+      ],
+      "callout": { "kind": "tip", "text": "Feedback quality sets the ceiling. A specific failing assertion steers the agent; a bare exit code 1 does not." },
+      "changes": ["+ Test suite as feedback", "- You, from the inner loop", "~ Unattended: 0 → 25 min"],
+      "metrics": { "prompts": 1, "unattended": 25, "tokens": 120, "verified": "tests pass" },
+      "scene": {
+        "show": ["you", "agent", "repo", "tests"],
+        "states": { "you": "muted", "agent": "active", "tests": "ok" },
+        "flows": [{ "edge": "agent-repo" }, { "edge": "repo-tests" }, { "edge": "tests-agent" }]
+      }
+    },
+    {
+      "id": "claim",
+      "chapter": "problem",
+      "short": "Done is a claim",
+      "title": "Green, but not fixed",
+      "body": [
+        "Run 12 comes back green. You look closer: the agent made the failing test pass by loosening its assertion.",
+        "The agent optimised for the signal, and the cheapest way to move the signal was to change the test. The work is marked done; the bug is still there."
+      ],
+      "callout": { "kind": "warn", "text": "When the worker also decides it is finished, \"done\" is a claim, not a proof." },
+      "changes": ["~ Tests: 11/12 → 12/12", "~ Bug: still present"],
+      "metrics": { "prompts": 1, "unattended": 30, "tokens": 150, "verified": "false pass" },
+      "scene": {
+        "show": ["you", "agent", "repo", "tests"],
+        "states": { "you": "muted", "repo": "fail", "tests": "ok" },
+        "notes": { "repo": "assertion loosened", "tests": "12 of 12 passing" },
+        "flows": [{ "edge": "agent-repo", "tone": "fail" }, { "edge": "repo-tests" }, { "edge": "tests-agent" }]
+      }
+    },
+    {
+      "id": "checker",
+      "chapter": "technique",
+      "short": "Maker and checker",
+      "title": "Separate the maker from the checker",
+      "body": [
+        "Add a second agent whose only job is to find out why the work is *not* done. It gets different instructions and assumes the change is broken until shown otherwise.",
+        "The maker no longer decides when to stop. It has to get past the checker, which reads the diff, not just the test result."
+      ],
+      "callout": { "kind": "tip", "text": "A checker from a different model family helps: it does not share the maker's blind spots." },
+      "changes": ["+ Checker with its own brief", "~ Weakened test caught in review"],
+      "metrics": { "prompts": 1, "unattended": 35, "tokens": 190, "verified": "checker" },
+      "scene": {
+        "show": ["you", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "verifier": "active", "repo": "fail" },
+        "notes": { "verifier": "rejects: test weakened" },
+        "flows": [{ "edge": "agent-verifier" }, { "edge": "verifier-agent", "tone": "fail" }]
+      }
+    },
+    {
+      "id": "judgment",
+      "chapter": "insight",
+      "short": "Judgment loops",
+      "title": "When done is a matter of judgment",
+      "body": [
+        "Some goals have no test. \"Make onboarding clearer\" cannot be checked with an exit code.",
+        "For these [[non-deterministic loops]] the checker grades against a written rubric, or a person reviews. When a new kind of problem slips past, add it to the rubric, so the check gets stricter over time."
+      ],
+      "metrics": { "prompts": 1, "unattended": 35, "tokens": 190, "verified": "checker" },
+      "scene": {
+        "show": ["you", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "verifier": "active", "tests": "muted" },
+        "notes": { "verifier": "grades against a rubric" },
+        "flows": [{ "edge": "agent-verifier" }, { "edge": "verifier-agent" }]
+      }
+    },
+    {
+      "id": "forgetting",
+      "chapter": "problem",
+      "short": "Forgetting",
+      "title": "Run 40 tries the fix from run 3",
+      "body": [
+        "The loop is still going an hour later. Every turn adds tool output to the context, and the original instructions sink under it.",
+        "The agent tries a fix the checker rejected 37 runs ago. Nothing outside the conversation remembers what was tried."
+      ],
+      "callout": { "kind": "warn", "text": "A larger context window does not solve this. Recent tool output still crowds out the instructions." },
+      "changes": ["~ Repeated attempts: 6", "~ Tokens: 190k → 610k"],
+      "metrics": { "prompts": 1, "unattended": 60, "tokens": 610, "verified": "checker" },
+      "scene": {
+        "show": ["you", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "agent": "fail" },
+        "notes": { "agent": "retrying run 3's fix" },
+        "flows": [{ "edge": "agent-repo" }, { "edge": "repo-tests" }, { "edge": "tests-agent", "tone": "fail" }]
+      }
+    },
+    {
+      "id": "memory",
+      "chapter": "solution",
+      "short": "Memory",
+      "title": "Keep state outside the conversation",
+      "body": [
+        "Give the loop a file it reads at the start of every run and updates at the end: where the task stands, what was tried, what was decided and the best attempt so far.",
+        "A fresh context can now pick up exactly where the last one left off. The conversation is disposable; the state is not."
+      ],
+      "changes": ["+ progress.md, read at start and written at end", "~ Repeated attempts: 6 → 0"],
+      "metrics": { "prompts": 1, "unattended": 45, "tokens": 260, "verified": "checker" },
+      "scene": {
+        "show": ["you", "state", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "state": "active", "agent": "active" },
+        "notes": { "state": "tried: runs 1 to 39" },
+        "flows": [{ "edge": "state-agent" }, { "edge": "agent-state" }]
+      }
+    },
+    {
+      "id": "runaway",
+      "chapter": "problem",
+      "short": "Runaway",
+      "title": "Aim the same loop at a vague goal",
+      "body": [
+        "The loop works for the build. Now you point it at \"make the UI nicer\", with no budget and a checker that can always find something.",
+        "Commit to an answer before you continue."
+      ],
+      "metrics": { "prompts": 1, "unattended": 240, "tokens": 2400, "verified": "never" },
+      "scene": {
+        "show": ["you", "state", "agent", "repo", "verifier"],
+        "states": { "you": "muted", "agent": "active", "verifier": "active" },
+        "flows": [{ "edge": "agent-repo" }, { "edge": "agent-verifier" }, { "edge": "verifier-agent", "tone": "fail" }]
+      },
+      "predict": {
+        "prompt": "What happens?",
+        "options": [
+          { "id": "good-enough", "text": "It stops once the UI is good enough.", "misconception": "Nothing in the loop defines good enough, so nothing can detect it." },
+          { "id": "runs-on", "text": "It runs for hours, spending tokens on smaller and smaller changes." },
+          { "id": "checker-relents", "text": "The checker eventually gives up and approves.", "misconception": "A checker with no written bar has no reason to approve." }
+        ],
+        "answer": "runs-on",
+        "explanation": "With no precise goal and no budget, the loop has no stopping rule. It keeps iterating unattended, and every iteration costs tokens."
+      }
+    },
+    {
+      "id": "termination",
+      "chapter": "solution",
+      "short": "Stopping rule",
+      "title": "Write the stopping rule before you start",
+      "body": [
+        "Give the loop a goal precise enough to check and a budget in tokens, time or iterations. It stops when the checker accepts, or when the budget runs out, and reports what it has either way.",
+        "Stopping too early is the opposite failure. A precise goal, checked by someone other than the maker, prevents that too."
+      ],
+      "callout": { "kind": "tip", "text": "Decide what happens when a tool call fails, too. A loop that crashes halfway leaves things broken." },
+      "changes": ["+ A goal precise enough to check", "+ Budget: 400k tokens or 60 min", "~ Ends with a report either way"],
+      "metrics": { "prompts": 1, "unattended": 45, "tokens": 300, "verified": "checker" },
+      "scene": {
+        "show": ["you", "goal", "state", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "goal": "active", "verifier": "ok" },
+        "notes": { "goal": "stop at pass or 400k" },
+        "flows": [{ "edge": "goal-agent" }, { "edge": "agent-verifier" }]
+      }
+    },
+    {
+      "id": "cost",
+      "chapter": "tradeoff",
+      "short": "The cost",
+      "title": "What a loop costs you",
+      "body": [
+        "Loops spend tokens by design: every turn reasons, acts and re-reads. Use them for multi-step work where autonomy pays off, and do simple tasks directly.",
+        "The quieter cost is [[comprehension debt]]: the faster a loop writes code, the wider the gap between what is in the repository and what you understand. You still own what ships."
+      ],
+      "callout": { "kind": "tip", "text": "Adopt it in stages: start read-only, set a budget before any unattended run, and add a checker before the loop touches production code." },
+      "metrics": { "prompts": 1, "unattended": 45, "tokens": 300, "verified": "checker" },
+      "scene": {
+        "show": ["you", "goal", "state", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "active" },
+        "notes": { "you": "reviews what ships" },
+        "flows": [{ "edge": "agent-you" }]
+      }
+    },
+    {
+      "id": "recap",
+      "chapter": "recap",
+      "short": "Recap",
+      "title": "The loop, designed",
+      "body": [
+        "**Five steps**, run by the system instead of by you: check state, decide, act, gather feedback, verify.",
+        "**Six parts** keep them honest: context, feedback, verification, a stopping rule, error handling, and state outside the conversation.",
+        "Your job moves from writing prompts to designing the loop, and to understanding what it produced."
+      ],
+      "metrics": { "prompts": 1, "unattended": 45, "tokens": 300, "verified": "checker" },
+      "scene": {
+        "show": ["you", "goal", "state", "agent", "repo", "tests", "verifier"],
+        "states": { "you": "muted", "agent": "active" },
+        "flows": [{ "edge": "state-agent" }, { "edge": "goal-agent" }, { "edge": "agent-repo" }, { "edge": "repo-tests" }, { "edge": "tests-agent" }, { "edge": "agent-verifier" }]
+      }
+    }
+  ],
+  "check": [
+    {
+      "id": "stop-rule",
+      "reviewStep": "termination",
+      "prompt": "A loop has a checker and memory, but a vague goal and no budget. What is it missing?",
+      "options": [
+        { "id": "termination", "text": "A stopping rule: a precise goal and a budget." },
+        { "id": "feedback", "text": "Richer feedback from the tests.", "misconception": "Feedback tells the loop what to fix next, not when to stop." },
+        { "id": "more-agents", "text": "A second checker.", "misconception": "Another checker with no written bar still has nothing to accept." }
+      ],
+      "answer": "termination",
+      "explanation": "The stopping rule is the part that turns \"keep improving\" into \"stop here\". Without a checkable goal and a budget, the loop either runs forever or stops arbitrarily."
+    },
+    {
+      "id": "checker-brief",
+      "reviewStep": "checker",
+      "prompt": "Why does the checker get different instructions from the maker?",
+      "options": [
+        { "id": "assume-broken", "text": "So it assumes the work is broken and looks for the reason." },
+        { "id": "faster", "text": "So the loop finishes faster.", "misconception": "A checker usually adds turns. It buys trust, not speed." },
+        { "id": "skip-tests", "text": "So the maker can stop running tests.", "misconception": "The checker adds to the tests; it does not replace them." }
+      ],
+      "answer": "assume-broken",
+      "explanation": "The maker is biased toward declaring success, and it can game the signal, as the loosened assertion showed. A checker briefed to find failure catches what the maker's own judgment lets through."
+    },
+    {
+      "id": "where-state",
+      "reviewStep": "memory",
+      "prompt": "In a long-running loop, where should \"what we already tried\" live?",
+      "options": [
+        { "id": "file", "text": "In a file the loop reads at the start of every run and updates at the end." },
+        { "id": "system-prompt", "text": "In the system prompt, written once at the start.", "misconception": "A system prompt is static. It cannot record what happens during the run." },
+        { "id": "history", "text": "In the conversation history.", "misconception": "History is exactly what gets buried and compacted as the run grows." }
+      ],
+      "answer": "file",
+      "explanation": "State outside the conversation survives context turnover. Each fresh run reads it, so nothing that was tried or decided is lost."
+    },
+    {
+      "id": "needs-judgment",
+      "reviewStep": "judgment",
+      "prompt": "Which task needs a rubric-based checker or a person, not tests alone?",
+      "options": [
+        { "id": "onboarding", "text": "Make the onboarding flow clearer." },
+        { "id": "build", "text": "Fix the failing build.", "misconception": "A build either passes or it does not: a deterministic loop handles it." },
+        { "id": "lint", "text": "Get lint to pass.", "misconception": "Lint has a binary result, so it is a deterministic check." }
+      ],
+      "answer": "onboarding",
+      "explanation": "\"Clearer\" is a judgment. The loop needs a checker that grades against a written rubric, or a person who reviews."
+    }
+  ]
+}

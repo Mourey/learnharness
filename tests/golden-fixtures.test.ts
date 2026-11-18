@@ -48,6 +48,10 @@ const { danglingQuestionOf, activeProblemOf } = await import("../src/core/native
 
 const TEACH = "chat_mv27rrra_feff23b6";
 const PRACTICE = "chat_mv293wv5_10656952";
+// The module tutor's birth record (app shell, 2026-11-18): written by the
+// real POST /api/chats with moduleContext (no LH_WIKI_DIR, so no private
+// notes), before its first turn — the module-context marker as message[0].
+const MODULE_TUTOR = "chat_mwmbpksd_7e8b14ac";
 
 function snapshotTree(dir: string): Map<string, Buffer> {
 	const out = new Map<string, Buffer>();
@@ -73,7 +77,8 @@ test("chats: both fixture records parse through the production read path", () =>
 	assert.ok(ids.has(TEACH), "the teach master record lists");
 	assert.ok(ids.has(PRACTICE), "the practice lifecycle record lists");
 
-	for (const id of [TEACH, PRACTICE]) {
+	assert.ok(ids.has(MODULE_TUTOR), "the module tutor birth record lists");
+	for (const id of [TEACH, PRACTICE, MODULE_TUTOR]) {
 		const r = chatStore.getChat(id);
 		assert.ok(r, `${id} reads`);
 		assert.ok(Array.isArray(r!.messages) && r!.messages.length > 0);
@@ -85,7 +90,7 @@ test("chats: both fixture records parse through the production read path", () =>
 });
 
 test("chats: the LLM wire flattening turns each full record into a legal provider message list", () => {
-	for (const id of [TEACH, PRACTICE]) {
+	for (const id of [TEACH, PRACTICE, MODULE_TUTOR]) {
 		const r = chatStore.getChat(id)!;
 		const wire = toLlmMessages(r.messages as never);
 		assert.ok(wire.length > 0);
@@ -116,6 +121,7 @@ test("markers: the fixture pair covers EVERY custom-marker kind of the current c
 	// fixture data fails here — extend the fixtures in the same commit.
 	const EXPECTED = [
 		"graph-context",
+		"module-context",
 		"probe-handoff",
 		"subagent-steer",
 		"subagent-abort",
@@ -126,7 +132,7 @@ test("markers: the fixture pair covers EVERY custom-marker kind of the current c
 		"compaction",
 	] as const;
 	const seen = new Set<string>();
-	for (const id of [TEACH, PRACTICE]) {
+	for (const id of [TEACH, PRACTICE, MODULE_TUTOR]) {
 		for (const m of chatStore.getChat(id)!.messages) {
 			if ((m as { role?: string }).role === "custom") seen.add((m as { customType: string }).customType);
 		}
