@@ -184,4 +184,10 @@ describe("library cards", () => {
 		assert.deepEqual(moduleWays(loops).map((w) => w.label), ["Video 1:48", `Lesson ${REPO_LESSON.steps.length} steps`, "Tutor"]);
 		assert.deepEqual(moduleWays(server.moduleSummary("unrendered")!).map((w) => w.label), ["Video not rendered", "Tutor"]);
 	});
+
+	it("say the packaged build left a missing video out, instead of \"not rendered\"", () => {
+		const unrendered = server.moduleSummary("unrendered")!;
+		assert.deepEqual(moduleWays(unrendered, true).map((w) => w.label), ["Video not included", "Tutor"]);
+		assert.equal(moduleWays(server.moduleSummary("loops")!, true)[0]!.label, "Video 1:48", "a shipped render reads the same");
+	});
 });
