@@ -116,6 +116,18 @@ export function applyModeClass(list: Pick<DOMTokenList, "toggle">, mode: "dark" 
 	list.toggle("light", mode === "light");
 }
 
+/** A computed CSS colour ("rgb(17, 18, 20)", "rgba(…, 1)") as #rrggbb, or
+ *  null for anything else — the window-chrome bridge accepts hex only. */
+export function cssColorToHex(value: string): string | null {
+	const m = /^rgba?\(\s*(\d{1,3})[,\s]+(\d{1,3})[,\s]+(\d{1,3})(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/.exec(value.trim());
+	if (!m) return /^#[0-9a-f]{6}$/i.test(value.trim()) ? value.trim().toLowerCase() : null;
+	const alpha = m[4];
+	if (alpha !== undefined && parseFloat(alpha) !== (alpha.endsWith("%") ? 100 : 1)) return null;
+	const channels = [m[1], m[2], m[3]].map(Number);
+	if (channels.some((c) => c > 255)) return null;
+	return `#${channels.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+}
+
 interface AppearanceContextValue {
 	/** Resolved appearance; factory until the record arrives. */
 	appearance: ReturnType<typeof resolveAppearance>;
@@ -166,6 +178,19 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 			appliedNamesRef.current.add(name);
 		}
 	}, [key, vars]);
+
+	// The native window chrome (Windows/Linux title bar overlay, resize
+	// background) follows the page: after the mode class and the vars above
+	// land, hand the body's computed colours to the desktop bridge. Browsers
+	// have no bridge; an opaque-colour miss leaves the chrome as it was.
+	useEffect(() => {
+		const setChrome = window.lh?.setWindowChrome;
+		if (!setChrome) return;
+		const style = getComputedStyle(document.body);
+		const background = cssColorToHex(style.backgroundColor);
+		const foreground = cssColorToHex(style.color);
+		if (background && foreground) setChrome({ background, foreground });
+	}, [mode, key]);
 
 	// One fetch per app load: the record (sanitized server-side) carries the
 	// delta; resolution happens here against the compiled factory.

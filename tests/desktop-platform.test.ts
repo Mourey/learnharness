@@ -1,6 +1,8 @@
 /** Platform window chrome + packaging policy, without launching Electron. */
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import { createRequire } from "node:module";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +17,7 @@ const mainRequire = createRequire(mainFile);
 /** Decline the single-instance lock so normal boot never spawns a server.
  * Then call the REAL createWindow with a stub Electron API and inspect its
  * constructor options. No rewritten copy of the production logic. */
-function windowOptions(platform: string, env: Record<string, string> = {}) {
+function windowOptions(platform: string, env: Record<string, string> = {}, userData = "/fixture/LearnHarness") {
 	class FakeWindow {
 		constructor(readonly options: unknown) {}
 		webContents = { on() {}, setWindowOpenHandler() {} };
@@ -23,7 +25,7 @@ function windowOptions(platform: string, env: Record<string, string> = {}) {
 		once() {}
 	}
 	const electron = {
-		app: { setName() {}, getPath: () => "/fixture/LearnHarness", setPath() {}, requestSingleInstanceLock: () => false, quit() {} },
+		app: { setName() {}, getPath: () => userData, setPath() {}, requestSingleInstanceLock: () => false, quit() {} },
 		BrowserWindow: FakeWindow,
 		session: { defaultSession: { setPermissionRequestHandler() {}, setPermissionCheckHandler() {} } },
 	};
@@ -61,6 +63,40 @@ describe("desktop window chrome", () => {
 		});
 	}
 
+	it("a saved Paper theme opens with a Paper overlay and resize background", () => {
+		const userData = mkdtempSync(path.join(tmpdir(), "lh-chrome-"));
+		try {
+			mkdirSync(path.join(userData, "data"));
+			writeFileSync(path.join(userData, "data", "settings.json"), JSON.stringify({ version: 1, appearance: { mode: "light" } }));
+			const win = windowOptions("win32", {}, userData);
+			assert.deepEqual(win.titleBarOverlay, { color: "#ffffff", symbolColor: "#16181d" });
+			assert.equal(win.backgroundColor, "#ffffff");
+			assert.equal(windowOptions("darwin", {}, userData).backgroundColor, "#ffffff", "the resize background follows on macOS too");
+			assert.equal(windowOptions("linux").backgroundColor, "#111214", "no settings: Night desk");
+		} finally {
+			rmSync(userData, { recursive: true, force: true });
+		}
+	});
+
+	it("live theme colours reach the window only validated, from trusted windows, overlay off macOS", () => {
+		const handler = mainSource.slice(mainSource.indexOf('ipcMain.on("lh:window-chrome"'));
+		const body = handler.slice(0, handler.indexOf("\n\t});"));
+		assert.ok(body.includes("trustedAppWindows.has(win)") && body.includes("trustedSender("), "trusted senders only");
+		assert.ok(body.indexOf("chromeColors(value)") < body.indexOf("setBackgroundColor"), "validated before applying");
+		assert.match(body, /process\.platform !== "darwin"\) win\.setTitleBarOverlay/);
+	});
+
+	it("preload exposes setWindowChrome on its one channel", () => {
+		let bridge!: { setWindowChrome(colors: unknown): void };
+		const sent: unknown[][] = [];
+		runInNewContext(readFileSync(new URL("../electron/preload.cjs", import.meta.url), "utf8"), {
+			process: { platform: "win32", argv: [] },
+			require: () => ({ contextBridge: { exposeInMainWorld: (_: string, value: typeof bridge) => { bridge = value; } }, ipcRenderer: { on() {}, send: (...args: unknown[]) => { sent.push(args); } } }),
+		});
+		bridge.setWindowChrome({ background: "#ffffff", foreground: "#16181d" });
+		assert.deepEqual(JSON.parse(JSON.stringify(sent)), [["lh:window-chrome", { background: "#ffffff", foreground: "#16181d" }]]);
+	});
+
 	it("only the external dev shell receives the web subscription transport marker", () => {
 		assert.equal(windowOptions("darwin").webPreferences.additionalArguments, undefined);
 		assert.deepEqual(windowOptions("darwin", { LH_DEV_URL: "http://localhost:3000" }).webPreferences.additionalArguments, ["--lh-web-subscriptions"]);
@@ -96,7 +132,7 @@ describe("desktop window chrome", () => {
 		runInNewContext(readFileSync(new URL("../electron/preload.cjs", import.meta.url), "utf8"), context);
 		assert.equal(bridge.platform, "win32");
 		assert.deepEqual(Object.keys(bridge).sort(), [
-			"chatgpt", "checkForUpdates", "expandWindow", "getUpdateState", "getZoom", "installUpdate", "onOpenSettings", "onUpdateStatus", "onZoom", "platform", "subscriptions",
+			"chatgpt", "checkForUpdates", "expandWindow", "getUpdateState", "getZoom", "installUpdate", "onOpenSettings", "onUpdateStatus", "onZoom", "platform", "setWindowChrome", "subscriptions",
 		]);
 		assert.deepEqual(Object.keys(bridge.subscriptions as object).sort(), ["cancel", "consent", "disconnect", "login", "onChange", "open", "respond", "retry", "status"]);
 	});

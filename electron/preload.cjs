@@ -24,6 +24,10 @@
  *   snapshot for a late subscriber; checkForUpdates requests a manual
  *   check (including download/install-on-quit, even with automatic checks OFF).
  *
+ *   window.lh.setWindowChrome({background, foreground}) — the theme's live
+ *   colours (#rrggbb) for the native title bar overlay (Windows/Linux) and
+ *   the resize background; main validates and ignores anything else.
+ *
  *   window.lh.onOpenSettings(cb) — menu navigation, buffered until React
  *   subscribes after a window is reopened. Browser builds have no bridge.
  *
@@ -74,6 +78,7 @@ contextBridge.exposeInMainWorld("lh", {
 		},
 	},
 	expandWindow: () => ipcRenderer.send("lh:expand-window"),
+	setWindowChrome: (colors) => ipcRenderer.send("lh:window-chrome", colors),
 	onZoom: (cb) => {
 		const listener = (_event, factor) => cb(factor);
 		ipcRenderer.on("lh:zoom", listener);
