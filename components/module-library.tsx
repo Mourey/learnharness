@@ -12,9 +12,12 @@ import type { ModuleSummary } from "@/src/core";
  * Cards list which of the three each module has.
  */
 
-export function moduleWays(m: ModuleSummary): { key: string; label: string }[] {
+/** The packaged app was built without a missing render, so "not rendered" (a
+ *  dev-checkout fix) would mislead there; it says the build left it out. */
+export function moduleWays(m: ModuleSummary, packaged = false): { key: string; label: string }[] {
+	const missing = packaged ? "Video not included" : "Video not rendered";
 	return [
-		m.video && { key: "video", label: m.video.rendered ? `Video ${m.video.duration}` : "Video not rendered" },
+		m.video && { key: "video", label: m.video.rendered ? `Video ${m.video.duration}` : missing },
 		m.lesson && { key: "lesson", label: `Lesson ${m.lesson.steps} steps` },
 		{ key: "tutor", label: "Tutor" },
 	].filter((w): w is { key: string; label: string } => !!w);
@@ -22,7 +25,7 @@ export function moduleWays(m: ModuleSummary): { key: string; label: string }[] {
 
 const wayIcon = { video: PlayIcon, lesson: BookOpenIcon, tutor: MessageCircleIcon } as const;
 
-export function ModuleLibrary({ modules }: { modules: ModuleSummary[] }) {
+export function ModuleLibrary({ modules, packaged = false }: { modules: ModuleSummary[]; packaged?: boolean }) {
 	return (
 		<div className="flex h-dvh flex-col">
 			<TopBar>
@@ -50,7 +53,7 @@ export function ModuleLibrary({ modules }: { modules: ModuleSummary[] }) {
 										<span className="font-prose text-xl font-bold tracking-tight group-hover:text-lh-signal">{m.title}</span>
 										<span className="mt-2 flex-1 font-prose text-base leading-relaxed text-muted-foreground">{m.summary}</span>
 										<span className="mt-4 flex flex-wrap gap-2">
-											{moduleWays(m).map((w) => {
+											{moduleWays(m, packaged).map((w) => {
 												const Icon = wayIcon[w.key as keyof typeof wayIcon];
 												return (
 													<span key={w.key} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 font-ui text-xs text-muted-foreground">
