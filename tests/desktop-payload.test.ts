@@ -7,6 +7,7 @@ import * as path from "node:path";
 import { describe, it } from "node:test";
 
 const source = fs.readFileSync(new URL("../scripts/build-server.mjs", import.meta.url), "utf8");
+const modulesSource = fs.readFileSync(new URL("../scripts/package-modules.mjs", import.meta.url), "utf8");
 const STANDALONE = path.join(".next", "standalone");
 const PROMPT = path.join("src", "agent", "system-prompt.md");
 
@@ -23,6 +24,7 @@ function withPayload(test: (fixture: {
 	};
 	try {
 		write(path.join("scripts", "build-server.mjs"), source);
+		write(path.join("scripts", "package-modules.mjs"), modulesSource);
 		write(path.join(STANDALONE, "server.js"));
 		write(path.join(".next", "static", "runtime.js"));
 		write(path.join("public", "asset.txt"));
@@ -83,6 +85,22 @@ describe("desktop standalone payload", () => {
 				assert.match(String(result.stderr), /REFUSING/);
 			});
 		}
+	});
+
+	it("ships each module's runtime files into the standalone folder, replacing a traced copy", () => {
+		withPayload(({ root, write, run }) => {
+			write(path.join("modules", "loops", "module.json"), JSON.stringify({ title: "L", summary: "s", lesson: "lesson.json", video: { file: "video/renders/l.mp4", duration: "1:00" } }));
+			write(path.join("modules", "loops", "lesson.json"), "{}");
+			write(path.join("modules", "loops", "video", "renders", "l.mp4"), "mp4");
+			write(path.join("modules", "loops", "video", "assets", "voice", "b01.wav"), "wav");
+			write(path.join(STANDALONE, "modules", "loops", "video", "assets", "voice", "b01.wav"), "traced");
+			const result = run();
+			assert.equal(result.status, 0, String(result.stderr));
+			assert.match(String(result.stdout), /module loops: module\.json, lesson\.json, video\/renders\/l\.mp4/);
+			const shipped = path.join(root, STANDALONE, "modules", "loops");
+			for (const file of ["module.json", "lesson.json", "video/renders/l.mp4"]) assert.ok(fs.existsSync(path.join(shipped, file)), file);
+			assert.equal(fs.existsSync(path.join(shipped, "video", "assets")), false, "the video's source project never ships");
+		});
 	});
 
 	it("still refuses a missing runtime prompt asset", () => {

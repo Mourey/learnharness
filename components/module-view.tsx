@@ -107,7 +107,27 @@ function TutorLauncher({ slug, title, wikiAvailable }: { slug: string; title: st
 	);
 }
 
-export function ModuleView({ module: m, lesson }: { module: ModuleSummary; lesson: Lesson | null }) {
+/**
+ * What stands in for a video whose render is missing. In a dev checkout the
+ * learner can render it; the packaged app was built without it, so the
+ * command would mean nothing there.
+ */
+export function VideoMissingNote({ slug, packaged }: { slug: string; packaged: boolean }) {
+	return (
+		<div data-testid="module-video-missing" className="rounded-[10px] border border-dashed border-border p-6 font-ui text-sm text-muted-foreground">
+			{packaged ? (
+				<>This build doesn&apos;t include the video. The lesson and the tutor below cover the same ground.</>
+			) : (
+				<>
+					The video hasn&apos;t been rendered on this machine. In modules/{slug}/video, run{" "}
+					<code className="text-foreground">npx hyperframes render --quality delivery</code>.
+				</>
+			)}
+		</div>
+	);
+}
+
+export function ModuleView({ module: m, lesson, packaged = false }: { module: ModuleSummary; lesson: Lesson | null; packaged?: boolean }) {
 	const ways = [
 		m.video && { href: "#watch", label: "Watch", detail: m.video.duration },
 		lesson && { href: "#lesson", label: "Walk through", detail: `${lesson.steps.length} steps · ${lesson.duration}` },
@@ -158,10 +178,7 @@ export function ModuleView({ module: m, lesson }: { module: ModuleSummary; lesso
 									src={`/api/modules/${m.slug}/video`}
 								/>
 							) : (
-								<div data-testid="module-video-missing" className="rounded-[10px] border border-dashed border-border p-6 font-ui text-sm text-muted-foreground">
-									The video hasn&apos;t been rendered on this machine. In modules/{m.slug}/video, run{" "}
-									<code className="text-foreground">npx hyperframes render --quality delivery</code>.
-								</div>
+								<VideoMissingNote slug={m.slug} packaged={packaged} />
 							)}
 						</Section>
 					)}
