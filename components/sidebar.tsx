@@ -6,10 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { MenuShell } from "@/components/menu-shell";
 import { DeleteSessionDialog } from "@/components/delete-session-dialog";
 import type { ChatDeleteMode } from "@/src/core";
-import { DumbbellIcon, LibraryIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import { DumbbellIcon, LibraryIcon, PanelLeftCloseIcon, RepeatIcon, PanelLeftOpenIcon, PlusIcon, SearchIcon, SettingsIcon } from "lucide-react";
 import { ActivitySection } from "@/components/activity-dock";
 import { CoverageMenuBlock } from "@/components/extraction-coverage";
 import { LhMark } from "@/components/lh-mark";
+import { dueBadge, useDueReviewCount } from "@/components/review-due";
 import { BrailleSpinner } from "@/components/braille-spinner";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { SettingsDialogProvider, useSettingsDialog } from "@/components/settings/settings-dialog.tsx";
@@ -402,6 +403,7 @@ function SessionsSidebar() {
 		window.localStorage.setItem(KIND_FILTER_KEY, f);
 	}, []);
 	const pathname = usePathname();
+	const dueReviews = dueBadge(useDueReviewCount(pathname));
 	const router = useRouter();
 	const { open: openSettings } = useSettingsDialog();
 
@@ -726,6 +728,23 @@ function SessionsSidebar() {
 					>
 						<LibraryIcon className="size-3" />
 						Modules
+					</Link>
+					{/* Spaced review (reinforcement, 2026-11-19): lesson-check confident
+					    misses and lucky guesses, with the count due now. */}
+					<Link
+						href="/review"
+						data-testid="nav-review"
+						aria-current={pathname?.startsWith("/review") ? "page" : undefined}
+						className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:text-foreground"
+					>
+						<RepeatIcon className="size-3" />
+						Review
+						{dueReviews && (
+							<span data-testid="nav-review-due" className="ml-auto rounded-full bg-lh-signal px-1.5 text-[10px] leading-4 font-semibold tracking-normal text-background">
+								{dueReviews}
+								<span className="sr-only"> due</span>
+							</span>
+						)}
 					</Link>
 				</div>
 

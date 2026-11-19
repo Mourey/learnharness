@@ -142,6 +142,8 @@
 .lesson-check footer { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 24px; padding-top: 24px; border-top: 1px solid var(--border); }
 .lesson-check footer .lesson-action { margin-top: 0; }
 .lesson-check-score { margin: 0; font-size: 16px; }
+.lesson-check-save { flex-basis: 100%; margin: 0; font-family: var(--font-mono); font-size: 13px; color: var(--muted-foreground); }
+.lesson-check-save.is-error { color: var(--lh-fail); }
 .lesson-check-score strong { font-size: 28px; font-weight: 700; margin-right: 6px; }
 
 @media (max-width: 1000px) {

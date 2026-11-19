@@ -40,6 +40,7 @@ const { graphStore } = await import("../src/store/graph.ts");
 const { jobStore } = await import("../src/store/jobs.ts");
 const { settingsStore } = await import("../src/store/settings.ts");
 const { readRenderSettings } = await import("../src/store/render-settings.ts");
+const { readReviews } = await import("../src/store/reviews.ts");
 const { getGraph, deriveView } = await import("../src/core/graph.ts");
 const { sanitizeRenderSettings } = await import("../src/core/render-settings.ts");
 const { toLlmMessages } = await import("../src/core/native-messages.ts");
@@ -226,6 +227,22 @@ test("settings: the stamped record parses", () => {
 });
 
 // ── read-only: readers never write ──────────────────────────────────────────
+
+// The review record (reinforcement, 2026-11-19): written by the real check
+// and review routes over the Loop engineering lesson — one graded attempt,
+// a confident miss already answered once in review (rung 1), a lucky guess
+// at rung 0, and a wrong guess left out of the queue.
+test("reviews: the record parses with its attempt, ladder and history", () => {
+	const r = readReviews();
+	assert.equal(r.version, 1);
+	assert.equal(r.attempts.length, 1);
+	assert.deepEqual(r.attempts[0]!.scheduled, ["stop-rule", "checker-brief"]);
+	assert.deepEqual(Object.keys(r.items).sort(), ["loop-engineering/checker-brief", "loop-engineering/stop-rule"]);
+	const miss = r.items["loop-engineering/stop-rule"]!;
+	assert.equal(miss.rung, 1);
+	assert.deepEqual(miss.history.map((h) => h.source), ["check", "review"]);
+	assert.equal(r.items["loop-engineering/checker-brief"]!.rung, 0);
+});
 
 test("read-only: after every read above, the data dir is byte-identical to the fixture source", () => {
 	const after = snapshotTree(TMP);
