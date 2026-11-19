@@ -31,6 +31,7 @@ const { createSubscriptions, loadSubscriptionSDK } = require("./subscriptions.cj
 const { attachSubscriptionChild, subscriptionControl } = require("./subscription-ipc.cjs");
 const { desktopAPIHeaders } = require("./desktop-api.cjs");
 const { openWebSubscriptionBrowser } = require("./web-subscription-browser.cjs");
+const { chromeColors, overlayFor, readInitialChrome } = require("./window-chrome.cjs");
 const { randomBytes } = require("node:crypto");
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
@@ -287,6 +288,10 @@ function killServer() {
  *  - will-navigate pinned to the app origin; window.open always denied —
  *    external links go to the real browser via shell.openExternal. */
 function createWindow(url) {
+	// Theme-following chrome (2026-11-19): the saved mode/background colour
+	// the overlay and resize background from the first frame; the renderer
+	// then keeps them in step over "lh:window-chrome" (electron/window-chrome.cjs).
+	const chrome = readInitialChrome(path.join(DATA_DIR(), "settings.json"), fs);
 	const win = new BrowserWindow({
 		width: 1440,
 		height: 900,
@@ -308,7 +313,7 @@ function createWindow(url) {
 				// height. Do not force the zoom-invariant native overlay to match
 				// the renderer's 60 CSS px bar: zooming out would cover its border.
 				// The renderer reserves the actual width via env(titlebar-area-*).
-				titleBarOverlay: { color: "#111214", symbolColor: "#e8e8e6" },
+				titleBarOverlay: overlayFor(chrome),
 				// Keep the custom bar alone; Alt reveals the native menu.
 				autoHideMenuBar: true,
 			}),
@@ -323,10 +328,10 @@ function createWindow(url) {
 		// the native window surface changes size before Chromium's compositor
 		// has a frame at the new size, and the gap shows the window's NATIVE
 		// background — Electron's default is white, glaring on a dark app.
-		// The app background (#111214, Night desk) fills the lag instead. `show: false` +
+		// The app background (the saved theme's) fills the lag instead. `show: false` +
 		// ready-to-show is the same treatment for first paint: the window
 		// appears only once the page has actually rendered.
-		backgroundColor: "#111214",
+		backgroundColor: chrome.background,
 		show: false,
 		// Narrow-window behavior (owner, 2026-09-17): 640px is the floor —
 		// below it even a wrapped chrome row gets cramped and the chat header
@@ -734,6 +739,17 @@ async function main() {
 	// The renderer's first paint can race did-finish-load — it asks for
 	// the current factor itself (mirrors "lh:zoom" pushes).
 	ipcMain.handle("lh:zoom:get", (event) => BrowserWindow.fromWebContents(event.sender)?.webContents.getZoomFactor() ?? 1);
+	// The renderer's live theme colours (mode switch, custom background):
+	// validated #rrggbb only, from trusted app windows only. macOS has no
+	// overlay (traffic lights); the resize background applies everywhere.
+	ipcMain.on("lh:window-chrome", (event, value) => {
+		const win = BrowserWindow.fromWebContents(event.sender);
+		if (!win || !trustedAppWindows.has(win) || !trustedSender(event, new URL(url).origin, BrowserWindow)) return;
+		const colors = chromeColors(value);
+		if (!colors) return;
+		win.setBackgroundColor(colors.background);
+		if (process.platform !== "darwin") win.setTitleBarOverlay(overlayFor(colors));
+	});
 	ipcMain.on("lh:expand-window", (event) => {
 		const win = BrowserWindow.fromWebContents(event.sender);
 		if (!win) return;

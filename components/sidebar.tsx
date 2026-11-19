@@ -67,6 +67,8 @@ declare global {
 			chatgpt?: ChatGPTControlBridge;
 			subscriptions?: NativeSubscriptionControlBridge;
 			expandWindow: () => void;
+			/** The theme's live colours (#rrggbb) for the native window chrome. */
+			setWindowChrome?: (colors: { background: string; foreground: string }) => void;
 			/** The zoom truth (owner round 7): subscribes to "lh:zoom" pushes; returns unsubscribe. */
 			onZoom?: (cb: (factor: number) => void) => () => void;
 			getZoom?: () => Promise<number>;
