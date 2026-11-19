@@ -42,8 +42,13 @@ const RUNTIME = ELECTRON_MODE ? createRequire(import.meta.url)("electron") : pro
 
 const POLL_MS = 500;
 const BOOT_TIMEOUT_MS = 30_000;
-/** GET-only probes — the routes that exercised today's failure class. */
-const PROBES = ["/api/graph", "/api/models", "/api/settings"];
+/** GET-only probes — the routes that exercised today's failure class, plus
+ *  the module library and each shipped module's page (404 when its payload
+ *  is missing from the standalone folder). */
+const SHIPPED_MODULES = fs.existsSync(path.join(STANDALONE, "modules"))
+	? fs.readdirSync(path.join(STANDALONE, "modules")).filter((slug) => fs.existsSync(path.join(STANDALONE, "modules", slug, "module.json")))
+	: [];
+const PROBES = ["/api/graph", "/api/models", "/api/settings", "/modules", ...SHIPPED_MODULES.map((slug) => `/modules/${slug}`)];
 
 if (!fs.existsSync(SERVER)) {
 	console.error("[smoke-server] .next/standalone/server.js missing — run next build first.");

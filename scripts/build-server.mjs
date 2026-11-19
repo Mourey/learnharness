@@ -12,6 +12,7 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { packageModules } from "./package-modules.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const STANDALONE = path.join(ROOT, ".next", "standalone");
@@ -38,6 +39,12 @@ copyTree(staticFrom, staticTo);
 if (exists(path.join(ROOT, "public"))) {
 	copyTree(path.join(ROOT, "public"), path.join(STANDALONE, "public"));
 }
+
+// 1b) The module library (app shell, 2026-11-19): the server finds modules
+// at cwd/modules, and its cwd is the standalone folder. Only the runtime
+// files ship (manifest, lesson, render when present); see package-modules.mjs.
+const modules = packageModules(path.join(ROOT, "modules"), path.join(STANDALONE, "modules"));
+for (const m of modules) console.log(`[build-server] module ${m.slug}: ${m.files.join(", ")}`);
 
 // 2) Safety: the repo's real data/ must NEVER ride along in the bundle.
 const leakedData = path.join(STANDALONE, "data");

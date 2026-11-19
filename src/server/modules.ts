@@ -14,6 +14,12 @@ import { moduleContextText, moduleManifestSchema, moduleSlug, type ModuleManifes
  * out of the library (and logged) instead of failing the page.
  */
 
+/** True in the packaged desktop app's server (electron/main.cjs sets it), where
+ *  modules ship inside the build and a missing render can't be produced. */
+export function isDesktopServer(): boolean {
+	return process.env.LH_DESKTOP_SERVER === "1";
+}
+
 export function modulesRoot(): string {
 	return process.env.LH_MODULES_DIR ?? path.join(process.cwd(), "modules");
 }
