@@ -1,0 +1,70 @@
+{
+	"version": 1,
+	"attempts": [
+		{
+			"slug": "loop-engineering",
+			"at": "2026-11-19T09:59:57.578Z",
+			"answers": {
+				"stop-rule": "feedback",
+				"checker-brief": "assume-broken",
+				"where-state": "file",
+				"needs-judgment": "build"
+			},
+			"confidence": {
+				"stop-rule": "certain",
+				"checker-brief": "guess",
+				"where-state": "certain",
+				"needs-judgment": "guess"
+			},
+			"correct": [
+				"checker-brief",
+				"where-state"
+			],
+			"scheduled": [
+				"stop-rule",
+				"checker-brief"
+			]
+		}
+	],
+	"items": {
+		"loop-engineering/stop-rule": {
+			"slug": "loop-engineering",
+			"questionId": "stop-rule",
+			"rung": 1,
+			"dueAt": "2026-11-22T09:59:57.586Z",
+			"addedAt": "2026-11-19T09:59:57.578Z",
+			"history": [
+				{
+					"at": "2026-11-19T09:59:57.578Z",
+					"source": "check",
+					"answer": "feedback",
+					"confidence": "certain",
+					"correct": false
+				},
+				{
+					"at": "2026-11-19T09:59:57.586Z",
+					"source": "review",
+					"answer": "termination",
+					"confidence": "fairly",
+					"correct": true
+				}
+			]
+		},
+		"loop-engineering/checker-brief": {
+			"slug": "loop-engineering",
+			"questionId": "checker-brief",
+			"rung": 0,
+			"dueAt": "2026-11-20T09:59:57.578Z",
+			"addedAt": "2026-11-19T09:59:57.578Z",
+			"history": [
+				{
+					"at": "2026-11-19T09:59:57.578Z",
+					"source": "check",
+					"answer": "assume-broken",
+					"confidence": "guess",
+					"correct": true
+				}
+			]
+		}
+	}
+}

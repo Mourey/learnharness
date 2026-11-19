@@ -46,3 +46,5 @@ export * from "./model-catalog.ts";
 export { subscriptionControlsResponse, subscriptionBrowserResponse } from "./web-subscription-http.ts";
 export { sessionCost } from "./pricing.ts";
 export * from "./modules.ts";
+// Spaced review (reinforcement, 2026-11-19): check grading and the review queue.
+export * from "./reviews.ts";

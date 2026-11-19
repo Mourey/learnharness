@@ -112,6 +112,14 @@ export const GRAPH_FORMAT_FILE = path.join(PATHS.graph, "format.json");
 export const SETTINGS_FILE = path.join(DATA_ROOT, "settings.json");
 
 /**
+ * Spaced review (reinforcement, 2026-11-19): graded lesson-check attempts
+ * and the review queue built from their confident misses and lucky guesses
+ * (src/core/reviews.ts). Read-modify-write like settings.json, written
+ * atomically (tmp + rename).
+ */
+export const REVIEWS_FILE = path.join(DATA_ROOT, "reviews.json");
+
+/**
  * User prompt-override files (settings-storage wave, 2026-09-19): the
  * per-segment system-prompt overrides mirroring the SOURCE layout
  * (src/agent/prompts/) — the shared base as prompts/system-prompt.md,

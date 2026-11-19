@@ -35,6 +35,11 @@ core tool surface must appear in real data here.
 - `jobs/` — five records covering kind × status: research done + aborted by
   learner, demo done, visual done, pdf error.
 - `settings.json` — the stamped settings record (version 1, model slots).
+- `reviews.json` — the spaced-review record (reinforcement, 2026-11-19):
+  written by the real `POST /api/modules/loop-engineering/check` (a
+  confident miss, a lucky guess, a right answer and a wrong guess) and one
+  `POST /api/reviews/loop-engineering/stop-rule` answer, so it holds an
+  attempt, an item at rung 1 with check + review history, and one at rung 0.
 
 ## Regenerating / extending
 

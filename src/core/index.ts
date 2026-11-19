@@ -87,3 +87,5 @@ export * from "./modules.ts";
 export * from "./lesson-schema.ts";
 export * from "./scene-geometry.ts";
 export * from "./lesson-inline.ts";
+// Spaced review (reinforcement, 2026-11-19): the ladder and the record shape.
+export * from "./reviews.ts";
