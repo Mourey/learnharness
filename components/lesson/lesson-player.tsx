@@ -9,6 +9,7 @@ import Question from './question';
 import LessonCheck from './lesson-check';
 import { useNarration } from './use-narration';
 import { clearProgress, emptyCheck, loadProgress, saveProgress, type CheckState } from './progress';
+import { fetchLatestCheck, restoreCheck, submitCheck, type CheckSave } from './check-sync';
 
 type Props = Pick<Lesson, 'scene' | 'metrics' | 'steps' | 'check'> & { slug: string };
 
@@ -34,6 +35,7 @@ export default function LessonPlayer({ slug, scene, metrics, steps, check }: Pro
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [checkState, setCheckState] = useState<CheckState>(emptyCheck);
   const [loaded, setLoaded] = useState(false);
+  const [checkSave, setCheckSave] = useState<CheckSave>({ status: 'idle' });
 
   // The schema guarantees at least two steps and go() clamps index, so the step always exists.
   const step = steps[index]!;
@@ -45,11 +47,32 @@ export default function LessonPlayer({ slug, scene, metrics, steps, check }: Pro
     const saved = loadProgress(slug);
     const fromHash = steps.findIndex(s => s.id === decodeURIComponent(location.hash.slice(1)));
     const fromSaved = steps.findIndex(s => s.id === saved?.step);
-    if (saved) { setPredictions(saved.predictions); setCheckState(saved.check); }
+    const local = saved?.check ?? emptyCheck();
+    if (saved) { setPredictions(saved.predictions); setCheckState(local); }
     if (fromHash >= 0) setIndex(fromHash);
     else if (fromSaved >= 0) setIndex(fromSaved);
     setLoaded(true);
+    // The submitted check lives on the server (it survives a cleared browser and reaches the desktop app).
+    let alive = true;
+    fetchLatestCheck(slug, fetch).then(attempt => { if (alive) setCheckState(current => restoreCheck(current, attempt)); }).catch(() => {});
+    return () => { alive = false; };
   }, [slug, steps]);
+
+  // Submitting sends the check to the server, which grades it and queues confident misses and lucky guesses.
+  // On failure the check reopens so the learner can submit again.
+  const changeCheck = (next: CheckState) => {
+    const submitting = next.submitted && !checkState.submitted;
+    setCheckState(next);
+    if (!next.submitted) { setCheckSave({ status: 'idle' }); return; }
+    if (!submitting) return;
+    setCheckSave({ status: 'saving' });
+    submitCheck(slug, next, fetch)
+      .then(attempt => setCheckSave({ status: 'saved', scheduled: attempt.scheduled.length }))
+      .catch((error: unknown) => {
+        setCheckState(current => ({ ...current, submitted: false }));
+        setCheckSave({ status: 'error', message: error instanceof Error ? error.message : String(error) });
+      });
+  };
 
   useEffect(() => {
     if (!loaded) return;
@@ -145,6 +168,6 @@ export default function LessonPlayer({ slug, scene, metrics, steps, check }: Pro
       </nav>
     </section>
 
-    <LessonCheck questions={check} steps={steps} state={checkState} onChange={setCheckState} onReview={review} />
+    <LessonCheck questions={check} steps={steps} state={checkState} save={checkSave} onChange={changeCheck} onReview={review} />
   </>;
 }

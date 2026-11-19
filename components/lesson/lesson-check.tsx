@@ -1,8 +1,10 @@
 "use client";
 
+import Link from 'next/link';
 import type { CheckQuestion, LessonStep } from '@/src/core';
 import type { CheckState, Confidence } from './progress';
 import Question from './question';
+import { checkSaveMessage, type CheckSave } from './check-sync';
 
 // The end-of-lesson check. Each answer carries a confidence rating, because a confident wrong answer is a held
 // misconception and a lucky guess is not yet understanding; both point back to the step worth reviewing.
@@ -13,9 +15,10 @@ const confidences: { id: Confidence; label: string }[] = [
   { id: 'certain', label: 'Certain' },
 ];
 
-interface Props { questions: CheckQuestion[]; steps: LessonStep[]; state: CheckState; onChange: (state: CheckState) => void; onReview: (stepId: string) => void }
+interface Props { questions: CheckQuestion[]; steps: LessonStep[]; state: CheckState; save?: CheckSave; onChange: (state: CheckState) => void; onReview: (stepId: string) => void }
 
-export default function LessonCheck({ questions, steps, state, onChange, onReview }: Props) {
+export default function LessonCheck({ questions, steps, state, save = { status: 'idle' }, onChange, onReview }: Props) {
+  const saveMessage = checkSaveMessage(save);
   const ready = questions.every(q => state.answers[q.id] && state.confidence[q.id]);
   const score = questions.filter(q => state.answers[q.id] === q.answer).length;
   const stepTitle = (id: string) => steps.find(step => step.id === id)?.short ?? id;
@@ -54,6 +57,9 @@ export default function LessonCheck({ questions, steps, state, onChange, onRevie
             <button type="button" className="lesson-action" onClick={() => onChange({ answers: {}, confidence: {}, submitted: false })}>Try again</button></>
         : <><button type="button" className="lesson-action" disabled={!ready} onClick={() => onChange({ ...state, submitted: true })}>Submit answers</button>
             {!ready && <p className="lesson-hint">Answer every question and rate your confidence to submit.</p>}</>}
+      {saveMessage && <p className={`lesson-check-save${save.status === 'error' ? ' is-error' : ''}`} role="status" data-testid="check-save">
+        {saveMessage}{save.status === 'saved' && save.scheduled > 0 && <> <Link className="lesson-link" href="/review">Open review</Link></>}
+      </p>}
     </footer>
   </section>;
 }
