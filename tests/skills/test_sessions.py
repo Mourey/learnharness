@@ -77,7 +77,7 @@ class SessionsTest(unittest.TestCase):
         listing = self.cli(GOLDEN, "--format", "json", "list")
         self.assertEqual(listing.returncode, 0, listing.stderr)
         index = json.loads(listing.stdout)
-        self.assertEqual(len(index["sessions"]), 2)
+        self.assertEqual(len(index["sessions"]), 3)
         self.assertEqual(index["skipped_count"], 0)
         self.assertEqual(index["data_dir"], str(GOLDEN.resolve()))
         self.assertEqual({s["kind"] for s in index["sessions"]}, {"teach", "practice"})

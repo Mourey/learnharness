@@ -25,6 +25,11 @@ core tool surface must appear in real data here.
   2026-10-10): graph-context (the bracketed preamble), problem ×2,
   practice-thinking ×2, conclude ×2, practice-next, problem-dismissed — the
   full marker cycle of a practice session, including the dismissal.
+- `chats/chat_mwmbpksd_7e8b14ac.json` — a module tutor's birth record
+  (app shell, 2026-11-18): written by the real `POST /api/chats` with
+  `moduleContext: { slug: "loop-engineering" }` and no `LH_WIKI_DIR` (so no
+  private notes), before its first turn — the module-context marker as
+  message[0], carrying the Loop engineering lesson. Stamped (`version: 1`).
 - `graph/` — the real ledgers: nodes (282 lines), chains (160), sessions (8),
   coverage (93), sources (4), render-settings, positions.
 - `jobs/` — five records covering kind × status: research done + aborted by

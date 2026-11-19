@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { MenuShell } from "@/components/menu-shell";
 import { DeleteSessionDialog } from "@/components/delete-session-dialog";
 import type { ChatDeleteMode } from "@/src/core";
-import { DumbbellIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import { DumbbellIcon, LibraryIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon, SearchIcon, SettingsIcon } from "lucide-react";
 import { ActivitySection } from "@/components/activity-dock";
 import { CoverageMenuBlock } from "@/components/extraction-coverage";
 import { LhMark } from "@/components/lh-mark";
@@ -714,6 +714,17 @@ function SessionsSidebar() {
 						Practice
 						<span className="sr-only">create a new practice session</span>
 					</button>
+					{/* The module library (app shell, 2026-11-18): each module pairs an
+					    explainer video, the interactive lesson and a tutor session. */}
+					<Link
+						href="/modules"
+						data-testid="nav-modules"
+						aria-current={pathname?.startsWith("/modules") ? "page" : undefined}
+						className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:text-foreground"
+					>
+						<LibraryIcon className="size-3" />
+						Modules
+					</Link>
 				</div>
 
 				<div className="mx-3 mb-2 flex items-center gap-2">

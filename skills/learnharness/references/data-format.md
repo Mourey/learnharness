@@ -137,6 +137,7 @@ recall/explain response: the teacher's subsequent prose is its interpretation.
 | --- | --- |
 | `practice-thinking` | **Learner-authored work**, including intermediate attempts and claimed answers; raw text is `details.text`, associated through `details.problemCallId` |
 | `graph-context` | Picked propositions/chains supplied as session context; app-injected, not learner speech |
+| `module-context` | A learning module's lesson (and wiki page, when configured) supplied to a tutor session; app-injected, not learner speech |
 | `plan-block` | Historical plan presentation snapshot in `details.block` |
 | `subagent-steer` | Delivered teaching artifact; `details.kind` and `details.result` identify the payload |
 | `subagent-abort` | Background work was aborted; no result should be invented |

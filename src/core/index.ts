@@ -80,3 +80,10 @@ export * from "./coverage.ts";
 // ONE session→markdown formatter — the extractor's view and the user-facing
 // export share it. Pure, browser-safe.
 export * from "./session-markdown.ts";
+// Learning modules (app shell, 2026-11-18): the manifest shape, the ported
+// rho lesson schema and scene geometry, and the tutor's context text.
+// Pure, browser-safe — src/server/modules.ts reads the files.
+export * from "./modules.ts";
+export * from "./lesson-schema.ts";
+export * from "./scene-geometry.ts";
+export * from "./lesson-inline.ts";

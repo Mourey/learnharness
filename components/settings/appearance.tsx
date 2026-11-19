@@ -7,9 +7,10 @@
  * Why variables and not className swaps: every seam the settings touch was
  * built token-first (--font-prose, --lh-prose-size, --lh-ink-strong, …),
  * so application is setProperty and nothing re-renders. The ONE thing the
- * variables can't reach — the mode — is dark-only this wave (the light
- * palette is designed in the later design wave; <html class="dark"> is
- * static in app/layout.tsx).
+ * variables can't reach — the mode — is a class on <html>: "dark" (Night
+ * desk) or "light" (Paper), both palettes in globals.css (app shell,
+ * 2026-11-18). app/layout.tsx server-renders the saved mode's class so the
+ * first frame is right; this provider flips it on change.
  *
  * The provider is mounted at the ROOT LAYOUT level (like ActivityProvider):
  * every page picks appearance up on load. The settings page writes a
@@ -76,7 +77,9 @@ export function derivedPalette(background: string): Record<string, string> {
  *  exported for tests. */
 export function appearanceVars(a: ReturnType<typeof resolveAppearance>): Record<string, string> {
 	const vars: Record<string, string> = {};
-	if (a.background !== null) Object.assign(vars, derivedPalette(a.background));
+	// The background override derives on the DARK curve (raise = lighter
+	// surfaces); it is a Night desk customization, so Paper ignores it.
+	if (a.background !== null && a.mode === "dark") Object.assign(vars, derivedPalette(a.background));
 	if (a.fontFamily !== null) {
 		vars["--font-prose"] = `"${a.fontFamily}", var(--font-sans3), ui-sans-serif, system-ui, sans-serif`;
 	}
@@ -105,6 +108,12 @@ export function staleVarNames(
 	nextVars: Record<string, string>,
 ): string[] {
 	return prevNames.filter((n) => !(n in nextVars));
+}
+
+/** Put exactly one mode class on the root. Pure over a classList, for tests. */
+export function applyModeClass(list: Pick<DOMTokenList, "toggle">, mode: "dark" | "light"): void {
+	list.toggle("dark", mode === "dark");
+	list.toggle("light", mode === "light");
 }
 
 interface AppearanceContextValue {
@@ -137,6 +146,13 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 	// has ever set is tracked; names absent from the new set are removed so
 	// the factory stylesheet value returns.
 	const appliedNamesRef = useRef<Set<string>>(new Set());
+	// The mode class: Tailwind's dark: variant keys on .dark, the Paper
+	// palette on .light (globals.css).
+	const mode = resolveAppearance(delta).mode;
+	useEffect(() => {
+		applyModeClass(document.documentElement.classList, mode);
+	}, [mode]);
+
 	useEffect(() => {
 		if (appliedRef.current === key) return;
 		appliedRef.current = key;

@@ -1,6 +1,6 @@
 import { chainsForSelection, formatChainLine } from "@/src/core";
-import { newGraphContextMessage, type GraphContextPick } from "@/src/core";
-import { compactionInFlight, createChat, isTurnRunning, listChats, readSettingsRecord, stores, titleFromPrompt } from "@/src/server";
+import { newGraphContextMessage, newModuleContextMessage, type GraphContextPick } from "@/src/core";
+import { compactionInFlight, createChat, isTurnRunning, listChats, moduleContext, readSettingsRecord, stores, titleFromPrompt } from "@/src/server";
 import type { ChatListItem } from "@/src/core";
 
 /** The session picker's list: record-derived summaries (phase, pending
@@ -20,11 +20,20 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-	const body = (await req.json().catch(() => ({}))) as { title?: unknown; kind?: unknown; graphContext?: unknown };
+	const body = (await req.json().catch(() => ({}))) as { title?: unknown; kind?: unknown; graphContext?: unknown; moduleContext?: unknown };
 	const title = typeof body.title === "string" ? body.title : "";
 	// Practice sessions (owner, 2026-10-04): kind "practice" marks the
 	// record — the practice agent + its tools from turn 1, no extraction.
 	const kind = body.kind === "practice" ? ("practice" as const) : undefined;
+	// A module tutor session (app shell, 2026-11-18): the module must
+	// exist BEFORE a chat is created, so a stale link never leaves an
+	// orphan session behind. Teach sessions only; practice keeps its picks.
+	const rawSlug = (body.moduleContext as { slug?: unknown } | undefined)?.slug;
+	const moduleSlug = typeof rawSlug === "string" && kind === undefined ? rawSlug : null;
+	const mod = moduleSlug ? moduleContext(moduleSlug) : null;
+	if (moduleSlug && !mod) {
+		return Response.json({ error: `unknown module "${moduleSlug}"` }, { status: 404 });
+	}
 	const chat = createChat(titleFromPrompt(title || "Untitled session"), kind);
 	// PER-SESSION MODELS (owner, 2026-09-28): a session owns its model +
 	// thinking level from birth — stamped verbatim from the STRONG slot,
@@ -66,6 +75,11 @@ export async function POST(req: Request) {
 			formatChainLine(c, Object.fromEntries(byId)),
 		);
 		stores.chatStore.saveMessages(chat.id, [newGraphContextMessage(picks, chainLines)]);
+	}
+	if (mod && moduleSlug) {
+		stores.chatStore.saveMessages(chat.id, [
+			newModuleContextMessage({ slug: moduleSlug, title: mod.title, sources: mod.sources }, mod.text),
+		]);
 	}
 	return Response.json({ id: chat.id, title: chat.title });
 }

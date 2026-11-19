@@ -67,6 +67,7 @@ export interface LhMarkerMessage {
 	role: "custom";
 	customType:
 		| "graph-context"
+		| "module-context"
 		| "probe-handoff"
 		| "subagent-steer"
 		| "subagent-abort"
@@ -282,6 +283,25 @@ export function newGraphContextMessage(picks: readonly GraphContextPick[], chain
 		content: lines.join("\n"),
 		display: true,
 		details: { propositions: picks, chains },
+		timestamp: Date.now(),
+	};
+}
+
+/** The module tutor's context (app shell, 2026-11-18): a session started
+ *  from a learning module carries the module's material as a SEPARATE
+ *  custom message BEFORE the learner's first user message, the
+ *  graph-context marker's pattern. `content` is the model-facing text
+ *  (core/modules.ts moduleContextText: the lesson's steps and check, and
+ *  the wiki page when available); `details` feeds the transcript's
+ *  collapsible card and never reaches the model. */
+export function newModuleContextMessage(details: { slug: string; title: string; sources: string[] }, content: string): LhMarkerMessage {
+	return {
+		id: newMessageId(),
+		role: "custom",
+		customType: "module-context",
+		content,
+		display: true,
+		details,
 		timestamp: Date.now(),
 	};
 }
@@ -733,7 +753,7 @@ export function nativeInputCause(message: AgentMessage, history: readonly AgentM
 	if (message.role === "custom") {
 		if (["probe-handoff", "subagent-steer", "subagent-abort"].includes(message.customType)) return "automatic";
 		if (["practice-thinking", "practice-next"].includes(message.customType)) return "learner";
-		return ["graph-context", "plan-block", "problem-dismissed", "compaction"].includes(message.customType) ? "neutral" : "unrecognizable";
+		return ["graph-context", "module-context", "plan-block", "problem-dismissed", "compaction"].includes(message.customType) ? "neutral" : "unrecognizable";
 	}
 	if (message.role === "toolResult") {
 		if (!(QUESTION_TOOLS as readonly string[]).includes(message.toolName) || message.isError || message.details == null || (message.details as { dismissed?: boolean }).dismissed) return "neutral";
