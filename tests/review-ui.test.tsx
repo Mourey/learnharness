@@ -39,7 +39,7 @@ describe("the check's server side", () => {
 	it("POSTs only answers and confidence, and returns the graded attempt", async () => {
 		const { f, calls } = fakeFetch(200, { attempt });
 		const got = await submitCheck("loop-engineering", { answers: { q1: "b" }, confidence: { q1: "certain" }, submitted: true }, f);
-		assert.deepEqual(got, attempt);
+		assert.deepEqual(got, { attempt, graph: "none", graphCount: 0 }, "an older server without graph fields reads as none");
 		assert.equal(calls[0]!.url, "/api/modules/loop-engineering/check");
 		assert.equal(calls[0]!.init?.method, "POST");
 		assert.deepEqual(JSON.parse(String(calls[0]!.init?.body)), { answers: { q1: "b" }, confidence: { q1: "certain" } });

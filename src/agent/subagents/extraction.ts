@@ -738,6 +738,14 @@ export interface ExtractionPipelineDeps extends GraphDeps, ExtractionModels {
 	getChunkTokens?: () => number;
 }
 
+/** A notes source's id: "src_" + the file path's hash — deterministic, so
+ *  re-importing the same path re-runs extraction against the same source.
+ *  Exported so callers that mint paths (lesson-check corrections) can find
+ *  their source again. */
+export function notesSourceId(filePath: string): string {
+	return `src_${crypto.createHash("sha256").update(filePath).digest("hex").slice(0, 12)}`;
+}
+
 export interface NotesImportInput {
 	/** The source's file path — its identity (deterministic src id) AND its
 	 *  provenance label in the detail card. */
@@ -1418,7 +1426,7 @@ export function createExtractionPipeline(deps: ExtractionPipelineDeps): Extracti
 	/** Every explicit import processes the whole file. Identity, source digest,
 	 * auditor and usage history remain source-scoped; this is not exactly-once. */
 	async function importNotes(input: NotesImportInput): Promise<EmissionStats> {
-		const id = `src_${crypto.createHash("sha256").update(input.filePath).digest("hex").slice(0, 12)}`;
+		const id = notesSourceId(input.filePath);
 		// Acquire BEFORE source upsert: overlapping contents must not alter metadata.
 		if (inFlight.has(id)) throw new NotesImportError("busy", { nodes: 0, chains: 0 }, "This file is already being imported. Try again when it finishes.");
 		inFlight.add(id);

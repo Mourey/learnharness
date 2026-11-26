@@ -9,7 +9,8 @@ import {
 	deleteNodeTraces,
 	type NodeDeletionStats,
 } from "../core/graph-deletion.ts";
-import { extractionStatuses } from "../agent/subagents/extraction.ts";
+import { extractionStatuses, notesSourceId } from "../agent/subagents/extraction.ts";
+import { withMisses } from "./review-graph.ts";
 import { stores } from "./stores.ts";
 import { callCost } from "./pricing.ts";
 
@@ -20,7 +21,9 @@ import { callCost } from "./pricing.ts";
  * reflects whatever the pipeline has merged so far.
  */
 export function graphView(): GraphSnapshot {
-	return graphSnapshot(stores);
+	// The confident-miss mark (reinforcement, 2026-11-19) is joined here, at
+	// read, from data/reviews.json — never written into the ledgers.
+	return withMisses(graphSnapshot(stores), notesSourceId);
 }
 
 /** The graph view's cost surface (GET /api/graph/costs — the 2026-09 cost

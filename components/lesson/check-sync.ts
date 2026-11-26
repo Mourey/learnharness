@@ -6,16 +6,26 @@ import type { CheckState } from './progress';
 // browser's copy stays a convenience: a check in progress lives in localStorage, a submitted one comes back from
 // the server. Fetch is injected so tests can pin the calls.
 
-export type CheckSave = { status: 'idle' } | { status: 'saving' } | { status: 'saved'; scheduled: number } | { status: 'error'; message: string };
+/** What happened to the new confident misses' corrections (POST check's `graph`). */
+export type GraphFeed = 'queued' | 'skipped-no-models' | 'none';
 
-export async function submitCheck(slug: string, state: CheckState, fetchLike: typeof fetch): Promise<CheckAttempt> {
+export type CheckSave =
+  | { status: 'idle' }
+  | { status: 'saving' }
+  | { status: 'saved'; scheduled: number; graph?: GraphFeed; graphCount?: number }
+  | { status: 'error'; message: string };
+
+export interface CheckSubmitResult { attempt: CheckAttempt; graph: GraphFeed; graphCount: number }
+
+export async function submitCheck(slug: string, state: CheckState, fetchLike: typeof fetch): Promise<CheckSubmitResult> {
   const res = await fetchLike(`/api/modules/${encodeURIComponent(slug)}/check`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ answers: state.answers, confidence: state.confidence }),
   });
   if (!res.ok) throw new Error(`the check wasn't saved (${res.status})`);
-  return ((await res.json()) as { attempt: CheckAttempt }).attempt;
+  const body = (await res.json()) as { attempt: CheckAttempt; graph?: GraphFeed; graphCount?: number };
+  return { attempt: body.attempt, graph: body.graph ?? 'none', graphCount: body.graphCount ?? 0 };
 }
 
 export async function fetchLatestCheck(slug: string, fetchLike: typeof fetch): Promise<CheckAttempt | null> {
@@ -36,6 +46,16 @@ export function checkSaveMessage(save: CheckSave): string | null {
   if (save.status === 'saving') return 'Saving…';
   if (save.status === 'error') return `${save.message}. Your answers are still here; submit again to retry.`;
   if (save.status !== 'saved') return null;
-  if (save.scheduled === 0) return 'Saved. Nothing new for your review queue.';
-  return `Saved. ${save.scheduled} ${save.scheduled === 1 ? 'question' : 'questions'} added to your review queue.`;
+  const queue = save.scheduled === 0
+    ? 'Saved. Nothing new for your review queue.'
+    : `Saved. ${save.scheduled} ${save.scheduled === 1 ? 'question' : 'questions'} added to your review queue.`;
+  return [queue, graphFeedMessage(save.graph ?? 'none', save.graphCount ?? 0)].filter(Boolean).join(' ');
+}
+
+/** The graph half of the footer line: the corrections of new confident misses. */
+export function graphFeedMessage(graph: GraphFeed, count: number): string | null {
+  const corrections = `${count} ${count === 1 ? 'correction' : 'corrections'}`;
+  if (graph === 'queued') return `Adding ${corrections} to your knowledge graph.`;
+  if (graph === 'skipped-no-models') return `Set up models in Settings to add ${corrections} to your knowledge graph.`;
+  return null;
 }

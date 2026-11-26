@@ -117,6 +117,8 @@ export interface CanvasColors {
 	edge: string;
 	label: string;
 	hoverText: string;
+	/** The confident-miss ring (reinforcement, 2026-11-19); absent = no rings. */
+	mark?: string;
 }
 
 export interface CanvasData {
@@ -131,6 +133,9 @@ export interface CanvasData {
 	 *  the premises/conclusion midpoint (owner, 2026-09-30). */
 	impLinks?: ReadonlyArray<{ id: string; premises: ReadonlyArray<string>; conclusion: string }>;
 	clusters: CanvasCluster[];
+	/** Node ids to ring (the learner's live lesson-check confident misses —
+	 *  derived on read, never stored in the graph). */
+	marked?: ReadonlySet<string>;
 	colors: CanvasColors;
 	/** Body font family (labels must match the app typography). */
 	fontFamily: string;
@@ -151,6 +156,13 @@ export interface RendererCallbacks {
 	/** The live sim settled after a drag: commit the new rest state
 	 *  (the caller PUTs it to the positions ledger). */
 	onCommit: (positions: Record<string, Position>) => void;
+}
+
+/** The nodes that get a confident-miss ring: marked, and not hidden by a
+ *  search filter (`visible` null = no filter). Pure, for tests. */
+export function ringedNodes<N extends { id: string }>(nodes: readonly N[], marked: ReadonlySet<string> | undefined, visible: ReadonlySet<string> | null | undefined): N[] {
+	if (!marked || marked.size === 0) return [];
+	return nodes.filter((n) => marked.has(n.id) && (!visible || visible.has(n.id)));
 }
 
 // ─── Constants (ported verbatim from the sigma view) ────────────────────────
@@ -1664,6 +1676,21 @@ export class GraphCanvasRenderer {
 		// 4. Nodes: one cached Path2D, one fill.
 		ctx.fillStyle = data.colors.node;
 		ctx.fill(this.nodesPath);
+
+		// 5. Confident-miss rings (reinforcement, 2026-11-19): a constant-
+		// on-screen ring just outside each marked node, skipping nodes the
+		// search has filtered out.
+		const rings = ringedNodes(data.nodes, data.marked, this.visible);
+		if (rings.length > 0 && data.colors.mark) {
+			ctx.strokeStyle = data.colors.mark;
+			ctx.lineWidth = 2 / k;
+			ctx.beginPath();
+			for (const n of rings) {
+				ctx.moveTo(n.x + nodeR + 3 / k, n.y);
+				ctx.arc(n.x, n.y, nodeR + 3 / k, 0, Math.PI * 2);
+			}
+			ctx.stroke();
+		}
 
 		// 6. Node labels — one global gate, faded together. World-scaled
 		// with the graph (they grow as you zoom in, Obsidian-style).

@@ -8,7 +8,7 @@ export * from "./chat-handler.ts";
 export * from "./events-stream.ts";
 export * from "./chats.ts";
 export * from "./graph.ts";
-export { NotesImportError } from "../agent/subagents/extraction.ts";
+export { NotesImportError, notesSourceId } from "../agent/subagents/extraction.ts";
 export * from "./commit-positions.ts";
 export * from "./jobs.ts";
 export * from "./stores.ts";
@@ -48,3 +48,5 @@ export { sessionCost } from "./pricing.ts";
 export * from "./modules.ts";
 // Spaced review (reinforcement, 2026-11-19): check grading and the review queue.
 export * from "./reviews.ts";
+// Confident misses in the graph (reinforcement, 2026-11-19).
+export * from "./review-graph.ts";
