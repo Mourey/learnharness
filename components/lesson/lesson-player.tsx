@@ -67,7 +67,7 @@ export default function LessonPlayer({ slug, scene, metrics, steps, check }: Pro
     if (!submitting) return;
     setCheckSave({ status: 'saving' });
     submitCheck(slug, next, fetch)
-      .then(attempt => setCheckSave({ status: 'saved', scheduled: attempt.scheduled.length }))
+      .then(({ attempt, graph, graphCount }) => setCheckSave({ status: 'saved', scheduled: attempt.scheduled.length, graph, graphCount }))
       .catch((error: unknown) => {
         setCheckState(current => ({ ...current, submitted: false }));
         setCheckSave({ status: 'error', message: error instanceof Error ? error.message : String(error) });

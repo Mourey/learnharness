@@ -331,6 +331,11 @@ export interface GraphSnapshot {
 	 *  graph (the format-agnostic front door): a static provenance entry —
 	 *  the detail card shows the path as plain text, not a link. */
 	fileSources: Record<string, string>;
+	/** DERIVED, never stored (reinforcement, 2026-11-19): node id → the
+	 *  learner's live lesson-check confident misses whose correction source
+	 *  is in the node's provenance. Learner state stays out of the ledgers;
+	 *  the server joins data/reviews.json at read. Absent = none. */
+	misses?: Record<string, Array<{ slug: string; questionId: string; moduleTitle: string; reviewStep: string }>>;
 	/** nodeId → chatIds that touched the node (click-through provenance). */
 	nodeSessions: Record<string, string[]>;
 	/** Birth-session communities (core/session-clusters.ts: each

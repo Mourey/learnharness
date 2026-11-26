@@ -89,3 +89,5 @@ export * from "./scene-geometry.ts";
 export * from "./lesson-inline.ts";
 // Spaced review (reinforcement, 2026-11-19): the ladder and the record shape.
 export * from "./reviews.ts";
+// Confident misses in the graph: corrections extracted, the mark derived on read.
+export * from "./review-graph.ts";

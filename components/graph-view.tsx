@@ -958,6 +958,29 @@ export function GraphChromeRow({
 	);
 }
 
+/** The node card's confident-miss line (reinforcement, 2026-11-19): which
+ *  lesson-check questions the learner missed while sure, whose correction
+ *  produced this node — with the way back to the lesson step and review. */
+export function NodeMisses({ misses }: { misses: NonNullable<GraphSnapshot["misses"]>[string] }) {
+	return (
+		<div data-testid="node-misses" className="mt-3 border-l-2 border-lh-fail pl-2 text-xs leading-relaxed">
+			<div className="text-foreground">You missed this while sure</div>
+			{misses.map((m) => (
+				<div key={`${m.slug}/${m.questionId}`} className="mt-0.5 text-muted-foreground">
+					{m.moduleTitle} check ·{" "}
+					<Link href={`/modules/${m.slug}#${m.reviewStep}`} className="text-lh-signal underline underline-offset-2">
+						revisit the step
+					</Link>{" "}
+					·{" "}
+					<Link href="/review" className="text-lh-signal underline underline-offset-2">
+						review
+					</Link>
+				</div>
+			))}
+		</div>
+	);
+}
+
 export function GraphView({
 	chainSelectOpen = false,
 	practiceSelection,
@@ -1426,11 +1449,15 @@ export function GraphView({
 			logicalEdges: snapshot.logicalEdges.map((e) => ({ from: e.from, to: e.to })),
 			impLinks: snapshot.impLinks,
 			clusters: snapshot.clusters.map((c) => ({ id: c.id, label: c.label, members: c.members })),
+			// Live lesson-check confident misses (reinforcement, 2026-11-19):
+			// derived server-side at read, ringed in the fail colour.
+			marked: new Set(Object.keys(snapshot.misses ?? {})),
 			colors: {
 				node: tokenHex(NODE_COLOR_TOKEN),
 				edge: tokenHex("--ring"),
 				label: tokenHex("--muted-foreground"),
 				hoverText: tokenHex("--foreground"),
+				mark: tokenHex("--lh-fail"),
 			},
 			// Match the app typography (Geist via the body's stack).
 			fontFamily: getComputedStyle(document.body).fontFamily,
@@ -1650,6 +1677,9 @@ export function GraphView({
 				>
 					<div className="text-sm font-medium leading-snug">{selected.node.name}</div>
 					<div className="mt-1 text-xs leading-relaxed text-muted-foreground">{selected.node.statement}</div>
+					{(snapshot?.misses?.[selected.node.id] ?? []).length > 0 && (
+						<NodeMisses misses={snapshot!.misses![selected.node.id]!} />
+					)}
 					{selected.sourceIds.length > 0 ? (
 						<div className="mt-3 flex flex-col gap-1">
 							<div className="text-xs text-muted-foreground">Sessions</div>

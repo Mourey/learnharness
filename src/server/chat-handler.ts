@@ -144,6 +144,18 @@ function resolveEngine(role: ModelRole): PiEngine | undefined {
 	return spec ? piEngineForSpec(spec) : undefined;
 }
 
+/** Whether an extraction run would start: both stage models resolve and
+ *  their provider keys are present — the same gates the pipeline refuses
+ *  on, checked up front so a background caller can skip honestly instead
+ *  of leaving an empty source record behind. */
+export function extractionReady(): boolean {
+	for (const role of ["extractor", "auditor"] as const) {
+		const engine = resolveEngine(role);
+		if (!engine || !providerKeyPresent(engine.model.provider)) return false;
+	}
+	return true;
+}
+
 setJobRespawn((jobId) => void jobRunner.runJob(jobId));
 
 /** The route-facing entry: parse {chatId, input} and run one turn. */
